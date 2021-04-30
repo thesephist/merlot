@@ -121,12 +121,23 @@ Editor := () => h('div', ['editor'], [
 	)
 ])
 
-Preview := () => h('div', ['preview'], [(
-	div := bind(document, 'createElement')('div')
-	bind(div.classList, 'add')('preview-content')
-	div.innerHTML := transform(State.content)
-	div
-)])
+Preview := () => hae(
+	'div'
+	['preview']
+	{}
+	{
+		scroll: evt => editor := bind(document, 'querySelector')('.editor-textarea') :: {
+			() -> ()
+			_ -> matchScrollProgress(evt.target, editor)
+		}
+	}
+	[(
+		div := bind(document, 'createElement')('div')
+		bind(div.classList, 'add')('preview-content')
+		div.innerHTML := transform(State.content)
+		div
+	)]
+)
 
 ` globals `
 
