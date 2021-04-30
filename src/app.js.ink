@@ -38,6 +38,77 @@ withFetch := (url, opts, cb) => (
 	))
 )
 
+prompt := (str, confirmText, withResp) => (
+	r := Renderer(document.body)
+	update := r.update
+
+	el := update(h('div', ['modal-wrapper'], [
+		h('div', ['modal', 'modal-prompt'], [
+			h('div', ['modal-title'], [str])
+			h('input', ['modal-input'], [])
+			h('div', ['modal-buttons'], [
+				hae('button', ['button okButton'], {}, {
+					click: () => callback(input.value)
+				}, [confirmText])
+				hae('button', ['button cancelButton'], {}, {
+					click: () => callback(())
+				}, ['Cancel'])
+			])
+		])
+	]))
+
+	handleKeys := evt => evt.key :: {
+		'Enter' -> callback(input.value)
+		'Escape' -> callback(())
+	}
+
+	input := bind(document, 'querySelector')('.modal-input')
+	bind(input, 'focus')()
+
+	bind(document, 'addEventListener')('keydown', handleKeys)
+
+	callback := s => (
+		bind(document.body, 'removeChild')(el)
+		bind(document, 'removeEventListener')('keydown', handleKeys)
+		withResp(s)
+	)
+)
+
+confirm := (str, withResp) => (
+	r := Renderer(document.body)
+	update := r.update
+
+	el := update(h('div', ['modal-wrapper'], [
+		h('div', ['modal', 'modal-prompt'], [
+			h('div', ['modal-title'], [str])
+			h('div', ['modal-buttons'], [
+				hae('button', ['button okButton'], {}, {
+					click: () => callback(true)
+				}, ['Ok'])
+				hae('button', ['button cancelButton'], {}, {
+					click: () => callback(false)
+				}, ['Cancel'])
+			])
+		])
+	]))
+
+	input := bind(document, 'querySelector')('.cancelButton')
+	bind(input, 'focus')()
+
+	handleKeys := evt => evt.key :: {
+		'Enter' -> callback(true)
+		'Escape' -> callback(false)
+	}
+
+	bind(document, 'addEventListener')('keydown', handleKeys)
+
+	callback := resp => (
+		bind(document.body, 'removeChild')(el)
+		bind(document, 'removeEventListener')('keydown', handleKeys)
+		withResp(resp)
+	)
+)
+
 ` a debounce without leading edge, with 2 hard-coded arguments `
 delay := (fn, timeout) => (
 	S := {
@@ -95,12 +166,27 @@ FileItem := (file, active?) => h(
 			_ -> ''
 		}
 	]
-	[hae('a', [], {href: f('/{{0}}', [file])}, {
-		click: evt => (
-			bind(evt, 'preventDefault')()
-			setActive(file)
-		)
-	}, [file])]
+	[
+		hae('a', [], {href: f('/{{0}}', [file])}, {
+			click: evt => evt.metaKey | evt.ctrlKey :: {
+				true -> ()
+				_ -> (
+					bind(evt, 'preventDefault')()
+					setActive(file)
+				)
+			}
+		}, [file])
+		hae('button', ['button deleteFile'], {}, {
+			click: () => confirm(f('Delete "{{0}}" forever?', [file]), resp => resp :: {
+				 true -> withFetch('/doc/' + file, {method: 'DELETE'}, () => (
+					 State.files := filter(State.files, f => ~(f = file))
+					 setDefaultActiveFile()
+					 render()
+				 ))
+				_ -> ()
+			})
+		}, ['×'])
+	]
 )
 
 Sidebar := () => (
@@ -225,7 +311,7 @@ toggleMode := () => render(State.editor.mode := (State.editor.mode :: {
 	'both' -> 'edit'
 }))
 
-addFile := () => fileName := prompt('File name?') :: {
+addFile := () => prompt('File name?', 'Create', fileName => fileName :: {
 	() -> ()
 	_ -> (
 		State.files.len(State.files) := fileName
@@ -236,8 +322,22 @@ addFile := () => fileName := prompt('File name?') :: {
 
 		withFetch('/doc/' + fileName, {method: 'PUT', body: ''}, () => (
 			setActive(fileName)
+			focusEditor()
 		))
 	)
+})
+
+focusEditor := () => ta := bind(document, 'querySelector')('.editor-textarea') :: {
+	() -> ()
+	_ -> (
+		bind(ta, 'setSelectionRange')(0, 0)
+		bind(ta, 'focus')()
+	)
+}
+
+setDefaultActiveFile := () => State.files :: {
+	[] -> ()
+	_ -> setActive(State.files.0)
 }
 
 handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
@@ -255,14 +355,13 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 	)
 	['e', true] -> (
 		bind(evt, 'preventDefault')
-		ta := bind(document, 'querySelector')('.editor-textarea') :: {
-			() -> ()
-			_ -> (
-				bind(ta, 'setSelectionRange')(0, 0)
-				bind(ta, 'focus')()
-			)
-		}
+		focusEditor()
 	)
+	['p', true] -> (
+		bind(evt, 'preventDefault')
+		window.open(f('/view/{{0}}', [State.activeFile]), '_blank')
+	)
+	` TODO: delete file, arrow-up and arrow-down to move through files list `
 }
 
 render := () => update(h('div', ['app'], [
@@ -292,11 +391,7 @@ withFetch('/doc/', {}, data => (
 	fileName := slice(location.pathname, 1, len(location.pathname))
 	fileName := replace(fileName, '%20', ' ')
 	len(filter(files, f => f = fileName)) :: {
-		0 -> files :: {
-			[] -> ()
-			_ -> setActive(files.0)
-		}
+		0 -> setDefaultActiveFile()
 		_ -> setActive(fileName)
 	}
 ))
-

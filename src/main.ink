@@ -60,6 +60,16 @@ addRoute('/doc/*fileName', params => (req, end) => req.method :: {
 			body: 'server error'
 		})
 	})
+	'DELETE' -> delete(f('db/{{0}}.md', [pctDecode(params.fileName)]), evt => evt.type :: {
+		'end' -> end({
+			status: 204
+			body: ''
+		})
+		_ -> end({
+			status: 500
+			body: 'server error'
+		})
+	})
 	_ -> end(MethodNotAllowed)
 })
 
