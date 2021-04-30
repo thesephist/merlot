@@ -20,6 +20,7 @@ build:
 		lib/torus.js.ink \
 		src/app.js.ink \
 		| tee /dev/stderr >> static/ink/bundle.js
+b: build
 
 # build whenever Ink sources change
 watch:
@@ -32,6 +33,6 @@ check:
 t: check
 
 fmt:
-	inkfmt fix ilb/*.ink src/*.ink test/*.ink
+	inkfmt fix lib/*.ink src/*.ink test/*.ink
 f: fmt
 
