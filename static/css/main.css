@@ -217,33 +217,43 @@ header nav {
 	border-left: 1px solid var(--active-bg);
 }
 
-.preview p {
+.preview-content p {
 	line-height: 1.5em;
 }
 
-.preview p img {
+.preview-content p img {
 	max-width: 100%;
 }
 
-.preview a {
+.preview-content p code {
+	padding: 1px 4px;
+}
+
+.preview-content a {
 	text-decoration: underline;
 }
 
-.preview pre,
-.preview code {
+.preview-content pre,
+.preview-content code {
 	background: var(--hover-bg);
 	font-size: 1em;
 	font-family: 'IBM Plex Mono', 'Menlo', 'Monaco', monospace;
 }
 
-.preview code {
+.preview-content code {
 	border-radius: 4px;
 }
 
-.preview pre {
+.preview-content pre {
 	border-radius: 4px;
 	box-sizing: border-box;
 	padding: 12px 8px;
+}
+
+.button.editPreview {
+	position: fixed;
+	top: 6px;
+	right: 6px;
 }
 
 @media only screen and (max-width: 600px) {

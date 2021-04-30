@@ -76,9 +76,13 @@ Header := () => h('header', [], [
 			href: 'https://github.com/thesephist/merlot'
 			target: '_blank'
 		}, ['About'])
+		ha('a', ['button'], {
+			href: f('/view/{{0}}', [State.activeFile])
+			target: '_blank'
+		}, ['View'])
 		hae('button', ['button'], {}, {
 			click: toggleMode
-		}, ['Change view'])
+		}, ['Mode'])
 	])
 ])
 
@@ -288,7 +292,10 @@ withFetch('/doc/', {}, data => (
 	fileName := slice(location.pathname, 1, len(location.pathname))
 	fileName := replace(fileName, '%20', ' ')
 	len(filter(files, f => f = fileName)) :: {
-		0 -> ()
+		0 -> files :: {
+			[] -> ()
+			_ -> setActive(files.0)
+		}
 		_ -> setActive(fileName)
 	}
 ))
