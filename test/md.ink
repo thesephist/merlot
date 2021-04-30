@@ -802,6 +802,33 @@ hr
 			), '<p><code><strong>internals check</strong></code></p>'
 		)
 		t(
+			'links'
+			compile([{
+				tag: 'p'
+				children: [{
+					tag: 'a'
+					href: 'some url'
+					children: [{
+						tag: 'em'
+						children: ['click here']
+					}]
+				}]
+			}])
+			'<p><a href="some url"><em>click here</em></a></p>'
+		)
+		t(
+			'image'
+			compile([{
+				tag: 'p'
+				children: [{
+					tag: 'img'
+					alt: 'alternative text'
+					src: 'https://linus.zone/pic'
+				}]
+			}])
+			'<p><img alt="alternative text" src="https://linus.zone/pic"/></p>'
+		)
+		t(
 			'headers'
 			compile([
 				{

@@ -491,10 +491,9 @@ compileNode := node => type(node) :: {
 		Node.H5 -> wrapTag('h5', node)
 		Node.H6 -> wrapTag('h6', node)
 		Node.Q -> wrapTag('q', node)
-		Node.Img -> f('<a alt="{{0}}" src="{{1}}">{{2}}</a>', [
+		Node.Img -> f('<img alt="{{0}}" src="{{1}}"/>', [
 			node.alt
 			node.src
-			compile(node.children)
 		])
 		Node.Pre -> wrapTag('pre', node)
 		Node.Code -> node.lang :: {
