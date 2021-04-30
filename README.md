@@ -2,7 +2,7 @@
 
 **Merlot** is a Markdown engine and writer app written in pure [Ink](https://dotink.co).
 
-# Syntax
+## Syntax
 
 Merlot's Markdown implementation attempts to be broadly compatible with GitHub and CommonMark specifications, and is designed for longform writing use cases, because that's what I needed it for (a blogging engine).
 
@@ -12,4 +12,12 @@ Merlot's Markdown parser adds a few exceptions to the common Markdown syntax tha
 
 1. Explicit inline HTML declaration with `!html` — every line following and including the `!html` line is parsed as inline HTML, until an empty line.
 2. Class syntax for inline images — this is a **TODO**.
+
+## Development
+
+- `make run`
+- `make build`
+- `make watch`
+- `make check`
+- `make fmt`
 

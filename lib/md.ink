@@ -477,7 +477,7 @@ wrapTag := (tag, node) => f('<{{0}}>{{1}}</{{0}}>', [
 
 ` compileNode transforms an individual Markdown AST node into HTML `
 compileNode := node => type(node) :: {
-	'string' -> node
+	'string' -> replace(node, '<', '&lt;')
 	_ -> node.tag :: {
 		Node.P -> wrapTag('p', node)
 		Node.Em -> wrapTag('em', node)

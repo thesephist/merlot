@@ -35,6 +35,13 @@ body.dark {
 	color: var(--primary-text);
 }
 
+body,
+button,
+input,
+textarea {
+	font-family: 'IBM Plex Sans', system-ui, 'Helvetica', Arial, sans-serif;
+}
+
 .button {
 	background: transparent;
 	border: 0;
@@ -180,7 +187,7 @@ header nav {
 
 .editor-textarea,
 .preview-content {
-	max-width: 700px;
+	max-width: 720px;
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
@@ -237,5 +244,33 @@ header nav {
 	border-radius: 4px;
 	box-sizing: border-box;
 	padding: 12px 8px;
+}
+
+@media only screen and (max-width: 600px) {
+	header .header-left {
+		width: auto;
+		flex-grow: 1;
+	}
+
+	header .addFile {
+		position: static;
+		transform: none;
+	}
+
+	.sidebar {
+		position: absolute;
+	}
+
+	.sidebar::after {
+		content: '';
+		position: absolute;
+		display: block;
+		top: 0;
+		bottom: 0;
+		left: 100%;
+		width: calc(100vw - var(--sidebar-width));
+		background: rgba(0, 0, 0, 0.6);
+		z-index: 20; /* above header */
+	}
 }
 

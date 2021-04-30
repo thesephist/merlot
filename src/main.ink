@@ -1,25 +1,35 @@
 std := load('../vendor/std')
+str := load('../vendor/str')
+sort := load('../vendor/quicksort').sort
 http := load('../vendor/http')
 mime := load('../vendor/mime')
+percent := load('../vendor/percent')
 
 log := std.log
 f := std.format
+cat := std.cat
+map := std.map
+slice := std.slice
 readFile := std.readFile
 writeFile := std.writeFile
+hasSuffix? := str.hasSuffix?
 mimeForPath := mime.forPath
+pctDecode := percent.decode
 
 md := load('../lib/md')
 
 transform := md.transform
 
 Port := 7650
+Newline := char(10)
 
 server := (http.new)()
+NotFound := {status: 404, body: 'file not found'}
 MethodNotAllowed := {status: 405, body: 'method not allowed'}
 
 serveStatic := path => (req, end) => req.method :: {
 	'GET' -> readFile('static/' + path, file => file :: {
-		() -> end({status: 404, body: 'file not found'})
+		() -> end(NotFound)
 		_ -> end({
 			status: 200
 			headers: {'Content-Type': mimeForPath(path)}
@@ -30,6 +40,55 @@ serveStatic := path => (req, end) => req.method :: {
 }
 
 addRoute := server.addRoute
+
+addRoute('/doc/*fileName', params => (req, end) => req.method :: {
+	'GET' -> readFile(f('db/{{0}}.md', [pctDecode(params.fileName)]), file => file :: {
+		() -> end(NotFound)
+		_ -> end({
+			status: 200
+			headers: {'Content-Type': 'text/plain'}
+			body: file
+		})
+	})
+	'PUT' -> writeFile(f('db/{{0}}.md', [pctDecode(params.fileName)]), req.body, res => res :: {
+		true -> end({
+			status: 200
+			body: ''
+		})
+		_ -> end({
+			status: 500
+			body: 'server error'
+		})
+	})
+	_ -> end(MethodNotAllowed)
+})
+
+addRoute('/doc/', params => (req, end) => req.method :: {
+	'GET' -> dir('db', evt => evt.type :: {
+		'data' -> end({
+			status: 200
+			headers: {'Content-Type': 'text/plain'}
+			body: cat(sort(map(evt.data, entry => hasSuffix?(entry.name, '.md') :: {
+				true -> slice(entry.name, 0, len(entry.name) - 3)
+				_ -> entry.name
+			})), Newline)
+		})
+		_ -> end({status: 500, body: 'server error'})
+	})
+	_ -> end(MethodNotAllowed)
+})
+
+addRoute('/view/*fileName', params => (req, end) => req.method :: {
+	'GET' -> readFile(f('db/{{0}}.md', [pctDecode(params.fileName)]), file => file :: {
+		() -> end(NotFound)
+		_ -> end({
+			status: 200
+			headers: {'Content-Type': mimeForPath('.html')}
+			body: transform(file)
+		})
+	})
+	_ -> end(MethodNotAllowed)
+})
 
 addRoute('/static/*staticPath', params => serveStatic(params.staticPath))
 addRoute('/', params => serveStatic('index.html'))
