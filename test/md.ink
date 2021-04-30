@@ -22,6 +22,10 @@ run := (m, t) => (
 			tag: 'p'
 			children: ['hello']
 		}])
+		t('characters are escaped properly by \\', parse('\\- x86\\_64'), [{
+			tag: 'p'
+			children: ['- x86_64']
+		}])
 		t('text with delimiters parses as one text node', parse('[([ hi) ]'), [{
 			tag: 'p'
 			children: ['[([ hi) ]']

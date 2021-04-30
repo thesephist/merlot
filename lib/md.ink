@@ -99,7 +99,7 @@ tokenizeText := line => (
 			sub()
 		)
 		` \ escapes any character `
-		'\\' -> sub(append(next))
+		'\\' -> sub(append(next()))
 		` code snippet `
 		'`' -> sub(push('`'))
 		` strike out `
