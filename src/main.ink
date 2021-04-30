@@ -81,10 +81,17 @@ addRoute('/doc/', params => (req, end) => req.method :: {
 addRoute('/view/*fileName', params => (req, end) => req.method :: {
 	'GET' -> readFile(f('db/{{0}}.md', [pctDecode(params.fileName)]), file => file :: {
 		() -> end(NotFound)
-		_ -> end({
-			status: 200
-			headers: {'Content-Type': mimeForPath('.html')}
-			body: transform(file)
+		_ -> readFile('static/preview.html', tpl => tpl :: {
+			() -> end(NotFound)
+			_ -> end({
+				status: 200
+				headers: {'Content-Type': mimeForPath('.html')}
+				body: transform(file)
+				body: f(tpl, {
+					fileName: pctDecode(params.fileName)
+					previewHTML: transform(file)
+				})
+			})
 		})
 	})
 	_ -> end(MethodNotAllowed)

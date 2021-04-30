@@ -254,9 +254,9 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 		ta := bind(document, 'querySelector')('.editor-textarea') :: {
 			() -> ()
 			_ -> (
-			 bind(ta, 'setSelectionRange')(0, 0)
-			bind(ta, 'focus')()
-			 )
+				bind(ta, 'setSelectionRange')(0, 0)
+				bind(ta, 'focus')()
+			)
 		}
 	)
 }

@@ -755,10 +755,16 @@ hr
 	m('md.compile')
 	(
 		compile := md.compile
+
 		t(
 			'plain text'
 			compile(['hello world'])
 			'hello world'
+		)
+		t(
+			'HTML is escaped properly'
+			compile(['<!-- comment --> <div>'])
+			'&lt;!-- comment --> &lt;div>'
 		)
 		t(
 			'single paragraph'

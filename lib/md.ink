@@ -14,6 +14,7 @@ digit? := str.digit?
 letter? := str.letter?
 hasPrefix? := str.hasPrefix?
 trimPrefix := str.trimPrefix
+replace := str.replace
 split := str.split
 
 Reader := load('reader').Reader
