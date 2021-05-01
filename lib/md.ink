@@ -65,8 +65,6 @@ tokenizeText := line => (
 
 	peek := reader.peek
 	next := reader.next
-	readUntil := reader.readUntil
-	readUntilPrefix := reader.readUntilPrefix
 
 	tokens := ['']
 	push := tok => (
@@ -140,15 +138,17 @@ parseText := tokens => (
 	readUntil := reader.readUntil
 	readUntilMatchingDelim := reader.readUntilMatchingDelim
 
-	handleDelimitedRange := (tok, tag, nodes, sub) => (
-		range := readUntil(tok)
-		next() ` swallow trailing tok `
-		nodes.len(nodes) := {
-			tag: tag
-			children: parseText(range)
-		}
-		sub(nodes)
-	)
+	handleDelimitedRange := (tok, tag, nodes, sub) => range := readUntil(tok) :: {
+		() -> sub(nodes.len(nodes) := tok)
+		_ -> (
+			next() ` swallow trailing tok `
+			nodes.len(nodes) := {
+				tag: tag
+				children: parseText(range)
+			}
+			sub(nodes)
+		)
+	}
 
 	nodes := (sub := nodes => tok := next() :: {
 		() -> nodes

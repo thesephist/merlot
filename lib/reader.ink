@@ -23,10 +23,6 @@ Reader := s => (
 		'string' -> (a, b) => a + b
 		_ -> (a, b) => a.len(a) := b
 	})
-	matchPrefix? := (type(s) :: {
-		'string' -> hasPrefix?
-		_ -> (a, b) => slice(a, 0, len(b)) = b
-	})
 
 	peek := () => s.(S.i)
 	last := () => s.(S.i - 1)
@@ -49,21 +45,37 @@ Reader := s => (
 		)
 		_ -> false
 	}
-	readUntil := c => (sub := substr => peek() :: {
-		c -> substr
-		() -> substr
-		_ -> sub(push(substr, next()))
-	})(base())
-	readUntilPrefix := prefix => (
-		(sub := substr => matchPrefix?(slice(s, S.i, len(s)), prefix) :: {
-			true -> substr
-			_ -> n := next() :: {
-				() -> substr
-				_ -> sub(push(substr, n))
-			}
-		})(base())
+	itemIndex := (list, it) => (sub := i => i < len(list) :: {
+		true -> list.(i) :: {
+			it -> i
+			_ -> sub(i + 1)
+		}
+		_ -> ~1
+	})(0)
+	readUntil := c => i := itemIndex(slice(s, S.i, len(s)), c) :: {
+		~1 -> ()
+		_ -> (
+			substr := slice(s, S.i, S.i + i)
+			S.i := S.i + i
+			substr
+		)
+	}
+	readUntilPrefix := prefix => (sub := i => i + len(prefix) > len(s) :: {
+		true -> ()
+		_ -> part := slice(s, i, i + len(prefix)) :: {
+			prefix -> (
+				substr := slice(s, S.i, i)
+				S.i := i
+				substr
+			)
+			_ -> sub(i + 1)
+		}
+	})(S.i)
+	readUntilEnd := () => (
+		substr := slice(s, S.i, len(s))
+		S.i := len(s)
+		substr
 	)
-	readUntilEnd := () => readUntil(())
 	` readUntilMatchingDelim is a helper specifically for parsing delimited
 	expressions like text in [] or (), that will attempt to read until a
 	matching delimiter and return that read if the match exists, and return ()

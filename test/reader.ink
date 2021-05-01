@@ -153,35 +153,44 @@ run := (m, t) => (
 			(r.readUntil)('s')
 			(r.next)()
 		), 's')
-		t('readUntil when char never occurs returns rest of string', (
+		t('readUntil from the middle of a string behaves correctly', (
+			r := Reader('hawaiian islands')
+			each([1, 2, 3, 4, 5], r.next)
+			(r.readUntil)('s')
+		), 'ian i')
+		t('readUntil when char never occurs returns ()', (
 			r := Reader('hawaiian islands')
 			(r.readUntil)('z')
-		), 'hawaiian islands')
+		), ())
 		t('readUntil for a list returns a list of entries', (
 			r := Reader([1, 2, 3, 4, 5, 6])
 			(r.next)()
 			(r.next)()
 			(r.readUntil)(5)
 		), [3, 4])
-		t('readUntil when item never occurs in list returns rest of list', (
+		t('readUntil when item never occurs in list returns ()', (
 			r := Reader([1, 2, 3, 4, 5, 6])
 			(r.next)()
 			(r.readUntil)(~1)
-		), [2, 3, 4, 5, 6])
+		), ())
 	)
 
 	m('Reader.readUntilPrefix')
 	(
-		t('Read until prefix returns empty string', (
+		t('readUntilPrefix returns empty string', (
 			r := Reader('abc')
 			(r.readUntilPrefix)('ab')
 		), '')
-		t('Read until prefix that exists returns correct substring', (
+		t('readUntilPrefix if whole string is prefix', (
+			r := Reader('xyzabc')
+			(r.readUntilPrefix)('abc')
+		), 'xyz')
+		t('readUntilPrefix that exists returns correct substring', (
 			r := Reader('abcdefghi')
 			(r.next)()
 			(r.readUntilPrefix)('fgh')
 		), 'bcde')
-		t('Read until prefix past a first character match', (
+		t('readUntilPrefix past a first character match', (
 			r := Reader('hawaiian islands')
 			(r.readUntilPrefix)('islands')
 		), 'hawaiian ')
@@ -195,11 +204,16 @@ run := (m, t) => (
 			(r.readUntilPrefix)('islands')
 			(r.next)()
 		), 'i')
-		t('readUntilPrefix when prefix never occurs returns rest of string', (
+		t('readUntilPrefix from the middle of a string behaves correctly', (
+			r := Reader('hawaiian islands')
+			each([1, 2, 3, 4, 5], r.next)
+			(r.readUntilPrefix)('and')
+		), 'ian isl')
+		t('readUntilPrefix when prefix never occurs returns ()', (
 			r := Reader('hawaiian islands')
 			(r.next)()
-			(r.readUntil)('india')
-		), 'awaiian islands')
+			(r.readUntilPrefix)('india')
+		), ())
 		t('readUntilPrefix for a list returns a list of entries', (
 			r := Reader([1, 2, 1, 2, 3, 1, 2, 3, 1, 2, 4])
 			each([1, 2, 3], r.next)
@@ -209,7 +223,7 @@ run := (m, t) => (
 			r := Reader(['hi', 'hello', 'what', 'where', 'how'])
 			(r.next)()
 			(r.readUntilPrefix)(['what', 'how'])
-		), ['hello', 'what', 'where', 'how'])
+		), ())
 	)
 
 	m('Reader.readUntilEnd')
@@ -271,7 +285,7 @@ run := (m, t) => (
 	m('Reader integrations')
 	(
 		t('Multiple readUntils in a row', (
-			r := Reader('first, second, third, fourth')
+			r := Reader('first, second, third, fourth,')
 			(sub := acc => (r.peek)() :: {
 				() -> acc
 				_ -> (
@@ -281,17 +295,17 @@ run := (m, t) => (
 				)
 			})([])
 		), ['first', ' second', ' third', ' fourth'])
-		t('Multiple readUntilPrefixes in a row', (
-			r := Reader('first, second, third, fourth')
-			(sub := acc => (r.peek)() :: {
-				() -> acc
-				_ -> (
-					acc.len(acc) := (r.readUntilPrefix)(', ')
-					(r.expect?)(', ')
-					sub(acc)
-				)
-			})([])
-		), ['first', 'second', 'third', 'fourth'])
+		`` t('Multiple readUntilPrefixes in a row', (
+		`` 	r := Reader('first, second, third, fourth')
+		`` 	(sub := acc => (r.peek)() :: {
+		`` 		() -> acc
+		`` 		_ -> (
+		`` 			acc.len(acc) := (r.readUntilPrefix)(', ')
+		`` 			(r.expect?)(', ')
+		`` 			sub(acc)
+		`` 		)
+		`` 	})([])
+		`` ), ['first', 'second', 'third', 'fourth'])
 	)
 )
 

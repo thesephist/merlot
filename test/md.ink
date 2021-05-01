@@ -26,6 +26,10 @@ run := (m, t) => (
 			tag: 'p'
 			children: ['- x86_64']
 		}])
+		t('unpaired delimiters for inline marks present as normal text', parse('** and _ and ~ and `'), [{
+			tag: 'p'
+			children: ['** and _ and ~ and `']
+		}])
 		t('text with delimiters parses as one text node', parse('[([ hi) ]'), [{
 			tag: 'p'
 			children: ['[([ hi) ]']
@@ -92,29 +96,9 @@ run := (m, t) => (
 				' world'
 			]
 		}])
-		t('unclosed italic automatically closes at end of line', parse('_ital'), [{
+		t('unclosed tags do not close at end of line', parse('**_mixed case'), [{
 			tag: 'p'
-			children: [{
-				tag: 'em'
-				children: ['ital']
-			}]
-		}])
-		t('unclosed bold automatically closes at end of line', parse('**bold'), [{
-			tag: 'p'
-			children: [{
-				tag: 'strong'
-				children: ['bold']
-			}]
-		}])
-		t('unclosed tags all automatically close at end of line', parse('**_mixed case'), [{
-			tag: 'p'
-			children: [{
-				tag: 'strong'
-				children: [{
-					tag: 'em'
-					children: ['mixed case']
-				}]
-			}]
+			children: ['**_mixed case']
 		}])
 		t('italic, bold, code block in header', parse('## my _big_ **scary** `code`'), [{
 			tag: 'h2'
