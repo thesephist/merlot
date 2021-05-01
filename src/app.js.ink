@@ -7,6 +7,9 @@ PersistenceDelay := 1000
 Mobile? := window.innerWidth < 600
 Touch? := navigator.maxTouchPoints > 0
 
+Tab := char(9)
+Newline := char(10)
+
 ` utility fns `
 
 navigate := url => bind(window.history, 'pushState')(document.title, (), url)
@@ -247,6 +250,22 @@ Editor := () => h('div', ['editor'], [
 				_ -> (
 					State.content := evt.target.value
 					handleEditorInput(State.activeFile, State.content)
+				)
+			}
+			keydown: evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
+				['Tab', false] -> (
+					bind(evt, 'preventDefault')()
+
+					idx := evt.target.selectionStart :: {
+						() -> ()
+						_ -> (
+							val := evt.target.value
+							front := slice(val, 0, idx)
+							back := slice(val, idx, len(val))
+							evt.target.value := front + Tab + back
+							bind(evt.target, 'setSelectionRange')(idx + 1, idx + 1)
+						)
+					}
 				)
 			}
 			scroll: evt => preview := bind(document, 'querySelector')('.preview') :: {
