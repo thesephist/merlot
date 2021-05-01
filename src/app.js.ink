@@ -213,6 +213,9 @@ Sidebar := () => (
 				'.'
 			])
 		])
+		hae('div', ['sidebar-shade'], {}, {
+			click: () => render(State.sidebar? := ~(State.sidebar?))
+		}, [])
 	])
 )
 

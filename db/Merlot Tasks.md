@@ -5,8 +5,9 @@
 - ~Watermark and about info in preview link~
 - ~Change editor window title when activeFile changes~
 - ~Fix modals on mobile~
-- Click on sidebar shade to close sidebar on mobile
+- ~Click on sidebar shade to close sidebar on mobile~
 - Loading animations
+- Deploy
 
 Let me tell you a story.
 

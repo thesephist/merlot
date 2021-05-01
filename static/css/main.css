@@ -7,7 +7,7 @@ body {
     font-family: 'IBM Plex Sans', system-ui, 'Helvetica', Arial, sans-serif;
 
     --header-height: 40px;
-    --sidebar-width: 300px;
+    --sidebar-width: 275px;
 
     --primary-bg: #f9fafb;
     --primary-text: #111111;
@@ -126,13 +126,17 @@ header nav {
 
 .sidebar {
     background: var(--secondary-bg);
-    width: 300px;
+    width: var(--sidebar-width);
     height: 100%;
     flex-grow: 0;
     flex-shrink: 1;
     padding-top: calc(var(--header-height) + 6px);
     position: relative;
     box-sizing: border-box;
+}
+
+.sidebar .sidebar-shade {
+    display: none;
 }
 
 .sidebar.hide {
@@ -373,8 +377,7 @@ header nav {
         position: absolute;
     }
 
-    .sidebar::after {
-        content: '';
+    .sidebar .sidebar-shade {
         position: absolute;
         display: block;
         top: 0;
