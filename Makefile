@@ -1,4 +1,4 @@
-all: run
+all: check # for ci
 
 # run app server
 run:
