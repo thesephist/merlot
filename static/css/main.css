@@ -89,7 +89,10 @@ header {
 }
 
 header .header-left {
-    width: calc(var(--sidebar-width) - 24px);
+    max-width: calc(var(--sidebar-width) - 24px);
+    flex-grow: 1;
+    padding-right: 28px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -105,7 +108,7 @@ header .toggleSidebar {
 header .addFile {
     position: absolute;
     top: 50%;
-    right: 0;
+    right: -8px;
     transform: translateY(-50%);
 }
 
@@ -245,6 +248,11 @@ header nav {
     outline: none;
     background: var(--primary-bg);
     resize: none;
+    transition: opacity .2s;
+}
+
+.editor-textarea.readonly {
+    opacity: .5;
 }
 
 .preview {
@@ -362,17 +370,39 @@ header nav {
     margin-left: 4px;
 }
 
+.loading {
+    width: 0;
+    flex-grow: 1;
+    margin: 0;
+    height: 3px;
+    position: relative;
+    background: var(--hover-bg);
+    overflow: hidden;
+}
+
+@keyframes slider {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.loading::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 60%;
+    padding-right: 40%;
+    background-color: #111111;
+    position: relative;
+    top: 0;
+    left: 0;
+    animation: slider 1s linear infinite;
+}
+
 @media only screen and (max-width: 600px) {
-    header .header-left {
-        width: auto;
-        flex-grow: 1;
-    }
-
-    header .addFile {
-        position: static;
-        transform: none;
-    }
-
     .sidebar {
         position: absolute;
     }

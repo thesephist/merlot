@@ -138,7 +138,7 @@ Header := () => h('header', [], [
 			click: () => render(State.sidebar? := ~(State.sidebar?))
 		}, ['☰'])
 		State.loading? :: {
-			true -> h('h1', [], ['Loading...'])
+			true -> h('div', ['loading'], [])
 			_ -> h('h1', [], ['Merlot.'])
 		}
 		hae('button', ['icon button addFile'], {}, {
@@ -175,6 +175,9 @@ FileItem := (file, active?) => h(
 				true -> ()
 				_ -> (
 					bind(evt, 'preventDefault')()
+					window.innerWidth < 600 :: {
+						true -> State.sidebar? := false
+					}
 					setActive(file)
 				)
 			}
@@ -220,11 +223,11 @@ Sidebar := () => (
 )
 
 handleEditorInput := delay(
-	evt => (
-		State.content := evt.target.value
+	(name, content) => (
+		State.content := content
 		render()
 
-		persistImmediately(State.activeFile, State.content)
+		persistImmediately(name, State.content)
 	)
 	PersistenceDelay
 )
@@ -232,14 +235,17 @@ handleEditorInput := delay(
 Editor := () => h('div', ['editor'], [
 	hae(
 		'textarea'
-		['editor-textarea']
+		['editor-textarea', State.stale? :: {true -> 'readonly', _ -> ''}]
 		{
 			placeholder: 'Say something...'
 			value: State.content
 			autofocus: true
 		}
 		{
-			input: handleEditorInput
+			input: evt => State.stale? :: {
+				true -> render()
+				_ -> handleEditorInput(State.activeFile, evt.target.value)
+			}
 			scroll: evt => preview := bind(document, 'querySelector')('.preview') :: {
 				() -> ()
 				_ -> matchScrollProgress(evt.target, preview)
@@ -292,11 +298,12 @@ State := {
 setActive := file => (
 	navigate(f('/{{0}}', [file]))
 	document.title := f('{{0}} | Merlot', [file])
+	State.stale? := true
 	render(State.activeFile := file)
 
 	withFetch(f('/doc/{{0}}', [file]), {}, data => (
-		State.content := data
-		render()
+		State.stale? := false
+		render(State.content := data)
 
 		textarea := bind(document, 'querySelector')('.editor-textarea') :: {
 			() -> ()
