@@ -9,6 +9,7 @@ log := std.log
 f := std.format
 cat := std.cat
 map := std.map
+filter := std.filter
 slice := std.slice
 readFile := std.readFile
 writeFile := std.writeFile
@@ -78,10 +79,11 @@ addRoute('/doc/', params => (req, end) => req.method :: {
 		'data' -> end({
 			status: 200
 			headers: {'Content-Type': 'text/plain'}
-			body: cat(sort(map(evt.data, entry => hasSuffix?(entry.name, '.md') :: {
-				true -> slice(entry.name, 0, len(entry.name) - 3)
-				_ -> entry.name
-			})), Newline)
+			body: (
+				mdFiles := filter(evt.data, entry => hasSuffix?(entry.name, '.md'))
+				mdNames := map(mdFiles, entry => slice(entry.name, 0, len(entry.name) - 3))
+				cat(sort(mdNames), Newline)
+			)
 		})
 		_ -> end({status: 500, body: 'server error'})
 	})
