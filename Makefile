@@ -1,4 +1,4 @@
-all: check # for ci
+all: ci
 
 # run app server
 run:
@@ -35,4 +35,8 @@ t: check
 fmt:
 	inkfmt fix lib/*.ink src/*.ink test/*.ink
 f: fmt
+
+# like test, but runs in CI with the bundled Ink interpreter
+ci:
+	./bin/ink ./test/main.ink
 
