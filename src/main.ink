@@ -93,15 +93,21 @@ addRoute('/view/*fileName', params => (req, end) => req.method :: {
 		() -> end(NotFound)
 		_ -> readFile('static/preview.html', tpl => tpl :: {
 			() -> end(NotFound)
-			_ -> end({
-				status: 200
-				headers: {'Content-Type': mimeForPath('.html')}
-				body: transform(file)
-				body: f(tpl, {
-					fileName: pctDecode(params.fileName)
-					previewHTML: transform(file)
+			_ -> (
+				start := time()
+				doc := transform(file)
+				elapsed := time() - start
+
+				end({
+					status: 200
+					headers: {'Content-Type': mimeForPath('.html')}
+					body: f(tpl, {
+						fileName: pctDecode(params.fileName)
+						previewHTML: doc
+						renderTime: floor(elapsed * 1000) ` in ms `
+					})
 				})
-			})
+			)
 		})
 	})
 	_ -> end(MethodNotAllowed)

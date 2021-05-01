@@ -1,5 +1,7 @@
 # Merlot
 
+[![Build Status](https://travis-ci.com/thesephist/merlot.svg?branch=main)](https://travis-ci.com/thesephist/merlot)
+
 **Merlot** is a Markdown engine and writer app written in pure [Ink](https://dotink.co).
 
 ## Syntax

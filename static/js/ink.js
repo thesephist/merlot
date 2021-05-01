@@ -182,7 +182,7 @@ function number(x) {
 		return x;
 	} else if (__is_ink_string(x)) {
 		const n = parseFloat(x);
-		return isNaN(n) ? 0 : n;
+		return isNaN(n) ? null : n;
 	} else if (typeof x === 'boolean') {
 		return x ? 1 : 0;
 	}

@@ -4,6 +4,9 @@
 
 PersistenceDelay := 1000
 
+Mobile? := window.innerWidth < 600
+Touch? := navigator.maxTouchPoints > 0
+
 ` utility fns `
 
 navigate := url => bind(window.history, 'pushState')(document.title, (), url)
@@ -178,11 +181,11 @@ FileItem := (file, active?) => h(
 		}, [file])
 		hae('button', ['button deleteFile'], {}, {
 			click: () => confirm(f('Delete "{{0}}" forever?', [file]), resp => resp :: {
-				 true -> withFetch('/doc/' + file, {method: 'DELETE'}, () => (
-					 State.files := filter(State.files, f => ~(f = file))
-					 setDefaultActiveFile()
-					 render()
-				 ))
+				true -> withFetch('/doc/' + file, {method: 'DELETE'}, () => (
+					State.files := filter(State.files, f => ~(f = file))
+					setDefaultActiveFile()
+					render()
+				))
 				_ -> ()
 			})
 		}, ['×'])
@@ -263,13 +266,16 @@ Preview := () => hae(
 
 ` globals `
 
-DefaultMode := () => window.innerWidth < 600 :: {
+DefaultMode := () => Mobile? :: {
 	true -> 'preview'
 	_ -> 'both'
 }
 
 State := {
-	sidebar?: true
+	sidebar?: Mobile? :: {
+		true -> false
+		_ -> true
+	}
 	loading?: false
 	files: []
 	activeFile: ()
@@ -282,10 +288,17 @@ State := {
 
 setActive := file => (
 	navigate(f('/{{0}}', [file]))
+	document.title := f('{{0}} | Merlot', [file])
 	render(State.activeFile := file)
+
 	withFetch(f('/doc/{{0}}', [file]), {}, data => (
 		State.content := data
 		render()
+
+		textarea := bind(document, 'querySelector')('.editor-textarea') :: {
+			() -> ()
+			_ -> textarea.scrollTop := 0
+		}
 	))
 )
 
@@ -345,6 +358,10 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 		bind(evt, 'preventDefault')()
 		render(State.sidebar? := ~(State.sidebar?))
 	)
+	['y', true] -> (
+		bind(evt, 'preventDefault')()
+		render(State.sidebar? := ~(State.sidebar?))
+	)
 	['j', true] -> (
 		bind(evt, 'preventDefault')()
 		toggleMode()
@@ -361,10 +378,23 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 		bind(evt, 'preventDefault')
 		window.open(f('/view/{{0}}', [State.activeFile]), '_blank')
 	)
+	[_, true] -> keyNum := number(evt.key) :: {
+		() -> ()
+		_ -> (
+			selection := State.files.(keyNum :: {
+				0 -> 9
+				_ -> keyNum - 1
+			})
+			selection :: {
+				() -> ()
+				_ -> setActive(selection)
+			}
+		)
+	}
 	` TODO: delete file, arrow-up and arrow-down to move through files list `
 }
 
-render := () => update(h('div', ['app'], [
+render := () => update(h('div', ['app', Touch? :: {true -> 'has-touch', _ -> ''}], [
 	Header()
 	Sidebar()
 	State.editor.mode :: {

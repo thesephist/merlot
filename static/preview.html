@@ -7,6 +7,30 @@
 <link rel="stylesheet" href="/static/css/main.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
+<style>
+.standalone-footer {
+    margin-top: 5rem;
+    font-size: 12px;
+}
+
+.standalone-footer,
+.standalone-footer a {
+    color: var(--secondary-text);
+}
+</style>
+
 <a href="/{{ fileName }}" class="button editPreview">Edit</a>
-<div class="preview-content standalone-preview">{{ previewHTML }}</div>
+<div class="preview-content standalone-preview">
+    {{ previewHTML }}
+    <footer class="standalone-footer">
+        <p>
+            Written in
+            <a target="_blank" href="https://github.com/thesephist/merlot">Merlot</a>,
+            a project by
+            <a target="_blank" href="https://thesephist.com/">Linus</a>.
+            |
+            Rendered in {{ renderTime }}ms.
+        </p>
+    </footer>
+</div>
 
