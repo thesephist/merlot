@@ -1,4 +1,4 @@
-# Merlot
+# Merlot 🍷
 
 [![Build Status](https://travis-ci.com/thesephist/merlot.svg?branch=main)](https://travis-ci.com/thesephist/merlot)
 

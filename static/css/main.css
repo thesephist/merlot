@@ -20,14 +20,14 @@ body {
 }
 
 body.dark {
-    --primary-bg: #f9fafb;
-    --primary-text: #111111;
-    --secondary-bg: #f3f4f6;
-    --secondary-text: #818181;
-    --hover-bg: #dcdfe4;
-    --active-bg: #cbcfd6;
-    --translucent: rgba(249, 250, 251, .8);
-    --transparent: rgba(249, 250, 251, 0);
+    --primary-bg: #2f3437;
+    --primary-text: #ebebeb;
+    --secondary-bg: #373c3f;
+    --secondary-text: #afb1b2;
+    --hover-bg: #474c50;
+    --active-bg: #626569;
+    --translucent: rgba(47, 52, 55, .8);
+    --transparent: rgba(47, 52, 55, 0);
 }
 
 #root,
@@ -43,6 +43,7 @@ body,
 button,
 input,
 textarea {
+    color: var(--primary-text);
     font-size: 1rem;
     font-family: 'IBM Plex Sans', system-ui, 'Helvetica', Arial, sans-serif;
 }
@@ -174,6 +175,7 @@ header nav {
     flex-grow: 1;
     flex-shrink: 0;
     overflow-y: auto;
+    width: 100%;
 }
 
 .file-list .file-item {
@@ -183,6 +185,8 @@ header nav {
     align-items: center;
     justify-content: space-between;
     border-radius: 6px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
     transition: background .2s;
 }
 

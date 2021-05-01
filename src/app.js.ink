@@ -302,7 +302,10 @@ State := {
 	files: []
 	activeFile: ()
 	content: 'loading editor...'
-	colorScheme: 'light'
+	colorScheme: bind(localStorage, 'getItem')('colorScheme') :: {
+		'dark' -> 'dark'
+		_ -> 'light'
+	}
 	editor: {
 		mode: DefaultMode()
 	}
@@ -347,10 +350,14 @@ toggleMode := () => render(State.editor.mode := (State.editor.mode :: {
 	'both' -> 'edit'
 }))
 
-toggleColorScheme := () => render(State.colorScheme := (State.colorScheme :: {
-	'light' -> 'dark'
-	'dark' -> 'light'
-}))
+toggleColorScheme := () => (
+	State.colorScheme := (State.colorScheme :: {
+		'light' -> 'dark'
+		'dark' -> 'light'
+	})
+	bind(localStorage, 'setItem')('colorScheme', State.colorScheme)
+	render()
+)
 
 addFile := () => prompt('File name?', 'Create', fileName => fileName :: {
 	() -> ()
