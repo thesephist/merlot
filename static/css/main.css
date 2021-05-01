@@ -12,7 +12,7 @@ body {
     --primary-bg: #f9fafb;
     --primary-text: #111111;
     --secondary-bg: #f3f4f6;
-    --secondary-text: #818181;
+    --secondary-text: #9b9b9b;
     --hover-bg: #dcdfe4;
     --active-bg: #cbcfd6;
     --translucent: rgba(249, 250, 251, .8);
@@ -23,7 +23,7 @@ body.dark {
     --primary-bg: #2f3437;
     --primary-text: #ebebeb;
     --secondary-bg: #373c3f;
-    --secondary-text: #afb1b2;
+    --secondary-text: #a4a7a9;
     --hover-bg: #474c50;
     --active-bg: #626569;
     --translucent: rgba(47, 52, 55, .8);
@@ -346,12 +346,12 @@ header nav .button {
     line-height: 1.5em;
 }
 
-.preview-content p img {
-    max-width: 100%;
+.preview-content strike {
+    color: var(--secondary-text);
 }
 
-.preview-content p code {
-    padding: 1px 4px;
+.preview-content img {
+    max-width: 100%;
 }
 
 .preview-content a {
@@ -366,14 +366,20 @@ header nav .button {
     font-family: 'IBM Plex Mono', 'Menlo', 'Monaco', monospace;
 }
 
-.preview-content code {
-    border-radius: 4px;
-}
-
 .preview-content pre {
     border-radius: 4px;
     box-sizing: border-box;
     padding: 12px 8px;
+    overflow-x: auto;
+}
+
+.preview-content code {
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.preview-content pre code {
+    padding: 0;
 }
 
 .preview-content q {
