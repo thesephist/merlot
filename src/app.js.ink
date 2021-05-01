@@ -49,10 +49,10 @@ prompt := (str, confirmText, withResp) => (
 			h('div', ['modal-title'], [str])
 			h('input', ['modal-input'], [])
 			h('div', ['modal-buttons'], [
-				hae('button', ['button okButton'], {}, {
+				hae('button', ['button', 'okButton'], {}, {
 					click: () => callback(input.value)
 				}, [confirmText])
-				hae('button', ['button cancelButton'], {}, {
+				hae('button', ['button', 'cancelButton'], {}, {
 					click: () => callback(())
 				}, ['Cancel'])
 			])
@@ -84,10 +84,10 @@ confirm := (str, withResp) => (
 		h('div', ['modal', 'modal-prompt'], [
 			h('div', ['modal-title'], [str])
 			h('div', ['modal-buttons'], [
-				hae('button', ['button okButton'], {}, {
+				hae('button', ['button', 'okButton'], {}, {
 					click: () => callback(true)
 				}, ['Ok'])
-				hae('button', ['button cancelButton'], {}, {
+				hae('button', ['button', 'cancelButton'], {}, {
 					click: () => callback(false)
 				}, ['Cancel'])
 			])
@@ -133,26 +133,27 @@ Link := (name, href) => ha('a', [], {
 
 Header := () => h('header', [], [
 	h('div', ['header-left'], [
-		hae('button', ['icon button toggleSidebar'], {}, {
+		hae('button', ['icon', 'button', 'toggleSidebar', 'tooltip-right'], {title: 'Toggle sidebar'}, {
 			click: () => render(State.sidebar? := ~(State.sidebar?))
 		}, ['☰'])
 		State.loading? :: {
 			true -> h('div', ['loading'], [])
 			_ -> h('h1', [], ['Merlot.'])
 		}
-		hae('button', ['icon button addFile'], {}, {
+		hae('button', ['icon', 'button', 'addFile'], {title: 'Add a file'}, {
 			click: addFile
 		}, ['+'])
 	])
 	h('nav', [], [
-		hae('button', ['button'], {}, {
+		hae('button', ['button', 'tooltip-left'], {title: 'Change color scheme'}, {
 			click: () => toggleColorScheme()
 		}, [State.colorScheme :: {'light' -> '☽', 'dark' -> '☉'}])
-		ha('a', ['button'], {
+		ha('a', ['button', 'tooltip-left'], {
 			href: f('/view/{{0}}', [State.activeFile])
 			target: '_blank'
+			title: 'Open a preview in its own tab'
 		}, ['Share'])
-		hae('button', ['button'], {}, {click: toggleMode}, [State.editor.mode :: {
+		hae('button', ['button', 'tooltip-left'], {title: 'Change editor mode'}, {click: toggleMode}, [State.editor.mode :: {
 			'edit' -> 'Preview'
 			'preview' -> 'Full'
 			'both' -> 'Editor'
@@ -182,7 +183,7 @@ FileItem := (file, active?) => h(
 				)
 			}
 		}, [file])
-		hae('button', ['button deleteFile'], {}, {
+		hae('button', ['button', 'deleteFile', 'tooltip-left'], {title: 'Delete this file'}, {
 			click: () => confirm(f('Delete "{{0}}" forever?', [file]), resp => resp :: {
 				true -> withFetch('/doc/' + file, {method: 'DELETE'}, () => (
 					State.files := filter(State.files, f => ~(f = file))

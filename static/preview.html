@@ -8,6 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
 <style>
+.editPreview {
+	opacity: 0;
+	transition: opacity .2s;
+}
+.editPreview:hover {
+	opacity: 1;
+}
+
 .standalone-footer {
     margin-top: 5rem;
     font-size: 12px;
@@ -19,7 +27,7 @@
 }
 </style>
 
-<a href="/{{ fileName }}" class="button editPreview">Edit</a>
+<a href="/{{ fileName }}" class="button editPreview tooltip-left" title="Log in to edit this file">Edit</a>
 <div class="preview-content standalone-preview">
     {{ previewHTML }}
     <footer class="standalone-footer">

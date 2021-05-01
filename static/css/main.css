@@ -58,6 +58,7 @@ textarea {
     cursor: pointer;
     font-size: 1em;
     border-radius: 6px;
+    position: relative;
 }
 
 a.button {
@@ -73,6 +74,50 @@ a.button {
 
 .button:active {
     background: var(--active-bg);
+}
+
+.button::after {
+    content: attr(title);
+    position: absolute;
+    pointer-events: none;
+    top: calc(100% + 6px);
+    left: 50%;
+    background: var(--primary-bg);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    opacity: 0;
+    transform: translate(-50%, -3px);
+    transition: opacity .2s, transform .2s;
+    transition-delay: 0s;
+}
+
+.button:hover::after {
+    transition-delay: .5s;
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+.button.tooltip-left::after {
+    right: 0;
+    left: unset;
+}
+
+.button.tooltip-right::after {
+    left: 0;
+    right: unset;
+}
+
+.button.tooltip-left::after,
+.button.tooltip-right::after {
+    transform: translate(0, -3px);
+}
+
+.button.tooltip-left:hover::after,
+.button.tooltip-right:hover::after {
+    transform: translate(0, 0);
 }
 
 header {
@@ -125,6 +170,10 @@ header nav {
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+header nav .button {
+    margin-left: 4px;
 }
 
 .app {
