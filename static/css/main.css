@@ -133,6 +133,10 @@ header nav {
 
 .sidebar {
     background: var(--secondary-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
     width: var(--sidebar-width);
     height: 100%;
     flex-grow: 0;
@@ -152,11 +156,9 @@ header nav {
 
 .sidebar footer {
     padding: 8px 12px;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
     color: var(--secondary-text);
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
 .sidebar footer p {
@@ -165,6 +167,13 @@ header nav {
 
 .sidebar footer a {
     color: var(--secondary-text);
+}
+
+.file-list {
+    height: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
+    overflow-y: auto;
 }
 
 .file-list .file-item {
