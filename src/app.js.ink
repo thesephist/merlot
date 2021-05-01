@@ -230,7 +230,7 @@ Sidebar := () => (
 handleEditorInput := delay(
 	(name, content) => (
 		render()
-		persistImmediately(name, State.content)
+		persistImmediately(name, content)
 	)
 	PersistenceDelay
 )
