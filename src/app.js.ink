@@ -147,14 +147,16 @@ Header := () => h('header', [], [
 	h('nav', [], [
 		hae('button', ['button'], {}, {
 			click: () => toggleColorScheme()
-		}, [State.colorScheme :: {'light' -> 'Dark', 'dark' -> 'Light'}])
+		}, [State.colorScheme :: {'light' -> '☽', 'dark' -> '☉'}])
 		ha('a', ['button'], {
 			href: f('/view/{{0}}', [State.activeFile])
 			target: '_blank'
-		}, ['View'])
-		hae('button', ['button'], {}, {
-			click: toggleMode
-		}, ['Mode'])
+		}, ['Share'])
+		hae('button', ['button'], {}, {click: toggleMode}, [State.editor.mode :: {
+			'edit' -> 'Preview'
+			'preview' -> 'Full'
+			'both' -> 'Editor'
+		}])
 	])
 ])
 
@@ -354,6 +356,8 @@ addFile := () => prompt('File name?', 'Create', fileName => fileName :: {
 	() -> ()
 	_ -> (
 		State.files.len(State.files) := fileName
+		sort!(State.files)
+
 		State.editor.mode :: {
 			'preview' -> State.editor.mode := DefaultMode()
 		}

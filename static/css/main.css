@@ -265,7 +265,7 @@ header nav {
 }
 
 .editor-textarea.readonly {
-    opacity: .5;
+    opacity: .35;
 }
 
 .preview {
