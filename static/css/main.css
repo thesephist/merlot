@@ -20,10 +20,14 @@ body {
 }
 
 body.dark {
-    --primary-bg: #111111;
-    --primary-text: #f8f8f8;
-    --secondary-bg: #222222;
-    --hover-bg: #ccc;
+    --primary-bg: #f9fafb;
+    --primary-text: #111111;
+    --secondary-bg: #f3f4f6;
+    --secondary-text: #818181;
+    --hover-bg: #dcdfe4;
+    --active-bg: #cbcfd6;
+    --translucent: rgba(249, 250, 251, .8);
+    --transparent: rgba(249, 250, 251, 0);
 }
 
 #root,
@@ -170,12 +174,12 @@ header nav {
     align-items: center;
     justify-content: space-between;
     border-radius: 6px;
+    transition: background .2s;
 }
 
 .file-list .file-item a {
     cursor: pointer;
     border-radius: 6px;
-    transition: background .2s;
     color: var(--primary-text);
     text-decoration: none;
     display: block;
@@ -263,7 +267,8 @@ header nav {
     border-left: 1px solid var(--active-bg);
 }
 
-.preview-content p {
+.preview-content p,
+.preview-content li {
     line-height: 1.5em;
 }
 

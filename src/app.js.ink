@@ -22,8 +22,7 @@ matchScrollProgress := (from, to) => (
 	toRect := bind(to, 'getBoundingClientRect')()
 	desiredScrollTop := (to.scrollHeight - toRect.height) * scrollPercent
 	inRange?(desiredScrollTop - 2, desiredScrollTop + 2, to.scrollTop) :: {
-		true -> ()
-		_ -> to.scrollTop := desiredScrollTop
+		false -> to.scrollTop := desiredScrollTop
 	}
 )
 
@@ -146,10 +145,9 @@ Header := () => h('header', [], [
 		}, ['+'])
 	])
 	h('nav', [], [
-		ha('a', ['button'], {
-			href: 'https://github.com/thesephist/merlot'
-			target: '_blank'
-		}, ['About'])
+		hae('button', ['button'], {}, {
+			click: () => toggleColorScheme()
+		}, [State.colorScheme :: {'light' -> 'Dark', 'dark' -> 'Light'}])
 		ha('a', ['button'], {
 			href: f('/view/{{0}}', [State.activeFile])
 			target: '_blank'
@@ -207,7 +205,8 @@ Sidebar := () => (
 		h('div', ['file-list'], items)
 		h('footer', [], [
 			h('p', [], [
-				'Merlot is a project by '
+				Link('Merlot', 'https://github.com/thesephist/merlot')
+				' is a project by '
 				Link('Linus', 'https://thesephist.com/')
 				' built with '
 				Link('Ink', 'https://dotink.co/')
@@ -224,9 +223,7 @@ Sidebar := () => (
 
 handleEditorInput := delay(
 	(name, content) => (
-		State.content := content
 		render()
-
 		persistImmediately(name, State.content)
 	)
 	PersistenceDelay
@@ -244,7 +241,10 @@ Editor := () => h('div', ['editor'], [
 		{
 			input: evt => State.stale? :: {
 				true -> render()
-				_ -> handleEditorInput(State.activeFile, evt.target.value)
+				_ -> (
+					State.content := evt.target.value
+					handleEditorInput(State.activeFile, State.content)
+				)
 			}
 			scroll: evt => preview := bind(document, 'querySelector')('.preview') :: {
 				() -> ()
@@ -255,6 +255,10 @@ Editor := () => h('div', ['editor'], [
 	)
 ])
 
+PreviewCache := {
+	content: ''
+	preview: ()
+}
 Preview := () => hae(
 	'div'
 	['preview']
@@ -265,12 +269,19 @@ Preview := () => hae(
 			_ -> matchScrollProgress(evt.target, editor)
 		}
 	}
-	[(
-		div := bind(document, 'createElement')('div')
-		bind(div.classList, 'add')('preview-content')
-		div.innerHTML := transform(State.content)
-		div
-	)]
+	[State.content :: {
+		PreviewCache.content -> PreviewCache.preview
+		_ -> (
+			div := bind(document, 'createElement')('div')
+			bind(div.classList, 'add')('preview-content')
+			div.innerHTML := transform(State.content)
+
+			PreviewCache.content := State.content
+			PreviewCache.preview := div
+
+			div
+		)
+	}]
 )
 
 ` globals `
@@ -289,9 +300,9 @@ State := {
 	files: []
 	activeFile: ()
 	content: 'loading editor...'
+	colorScheme: 'light'
 	editor: {
 		mode: DefaultMode()
-		colorScheme: 'light'
 	}
 }
 
@@ -320,7 +331,7 @@ persistImmediately := (name, content) => withFetch(
 	}
 	() => ()
 )
-persist := delay(persistImmediately, persistImmediately)
+persist := delay(persistImmediately, PersistenceDelay)
 
 ` main app render loop `
 
@@ -332,6 +343,11 @@ toggleMode := () => render(State.editor.mode := (State.editor.mode :: {
 	'edit' -> 'preview'
 	'preview' -> 'both'
 	'both' -> 'edit'
+}))
+
+toggleColorScheme := () => render(State.colorScheme := (State.colorScheme :: {
+	'light' -> 'dark'
+	'dark' -> 'light'
 }))
 
 addFile := () => prompt('File name?', 'Create', fileName => fileName :: {
@@ -384,6 +400,10 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 		bind(evt, 'preventDefault')
 		focusEditor()
 	)
+	['.', true] -> (
+		bind(evt, 'preventDefault')
+		toggleColorScheme()
+	)
 	['p', true] -> (
 		bind(evt, 'preventDefault')
 		window.open(f('/view/{{0}}', [State.activeFile]), '_blank')
@@ -401,23 +421,24 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 			}
 		)
 	}
-	` TODO: delete file, arrow-up and arrow-down to move through files list `
 }
 
-render := () => update(h('div', ['app', Touch? :: {true -> 'has-touch', _ -> ''}], [
-	Header()
-	Sidebar()
-	State.editor.mode :: {
-		'preview' -> ()
-		_ -> Editor()
-	}
-	State.editor.mode :: {
-		'edit' -> ()
-		_ -> Preview()
-	}
-]))
+render := () => (
+	document.body.className := State.colorScheme
 
-render()
+	update(h('div', ['app', Touch? :: {true -> 'has-touch', _ -> ''}], [
+		Header()
+		Sidebar()
+		State.editor.mode :: {
+			'preview' -> ()
+			_ -> Editor()
+		}
+		State.editor.mode :: {
+			'edit' -> ()
+			_ -> Preview()
+		}
+	]))
+)
 
 ` fasten keyboard events `
 bind(document.documentElement, 'addEventListener')('keydown', handleKeyEvents)
@@ -435,3 +456,6 @@ withFetch('/doc/', {}, data => (
 		_ -> setActive(fileName)
 	}
 ))
+
+render()
+
