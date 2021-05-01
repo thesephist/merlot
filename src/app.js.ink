@@ -235,47 +235,81 @@ handleEditorInput := delay(
 	PersistenceDelay
 )
 
-Editor := () => h('div', ['editor'], [
-	hae(
-		'textarea'
-		['editor-textarea', State.stale? :: {true -> 'readonly', _ -> ''}]
-		{
-			placeholder: 'Say something...'
-			value: State.content
-			autofocus: true
-		}
-		{
-			input: evt => State.stale? :: {
-				true -> render()
-				_ -> (
-					State.content := evt.target.value
-					handleEditorInput(State.activeFile, State.content)
-				)
-			}
-			keydown: evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
-				['Tab', false] -> (
-					bind(evt, 'preventDefault')()
+Editor := () => (
+	handleInput := evt => State.stale? :: {
+		true -> render()
+		_ -> (
+			State.content := evt.target.value
+			handleEditorInput(State.activeFile, State.content)
+		)
+	}
 
-					idx := evt.target.selectionStart :: {
-						() -> ()
-						_ -> (
-							val := evt.target.value
-							front := slice(val, 0, idx)
-							back := slice(val, idx, len(val))
-							evt.target.value := front + Tab + back
-							bind(evt.target, 'setSelectionRange')(idx + 1, idx + 1)
-						)
-					}
-				)
-			}
-			scroll: evt => preview := bind(document, 'querySelector')('.preview') :: {
-				() -> ()
-				_ -> matchScrollProgress(evt.target, preview)
-			}
+	markupSection := (evt, mark) => (
+		bind(evt, 'preventDefault')()
+
+		start := evt.target.selectionStart
+		end := evt.target.selectionEnd
+		[start, end] :: {
+			[(), ()] -> ()
+			_ -> (
+				val := evt.target.value
+				front := slice(val, 0, start)
+				middle := slice(val, start, end)
+				back := slice(val, end, len(val))
+				hasSuffix?(front, mark) & hasPrefix?(back, mark) :: {
+					true -> (
+						evt.target.value := slice(front, 0, len(front) - len(mark)) + middle + slice(back, len(mark), len(back))
+						bind(evt.target, 'setSelectionRange')(start - len(mark), end - len(mark))
+					)
+					_ -> (
+						evt.target.value := front + mark + middle + mark + back
+						bind(evt.target, 'setSelectionRange')(start + len(mark), end + len(mark))
+					)
+				}
+
+				handleInput(evt)
+			)
 		}
-		[]
 	)
-])
+
+	h('div', ['editor'], [
+		hae(
+			'textarea'
+			['editor-textarea', State.stale? :: {true -> 'readonly', _ -> ''}]
+			{
+				placeholder: 'Say something...'
+				value: State.content
+				autofocus: true
+			}
+			{
+				input: handleInput
+				keydown: evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
+					['Tab', false] -> (
+						bind(evt, 'preventDefault')()
+
+						idx := evt.target.selectionStart :: {
+							() -> ()
+							_ -> (
+								val := evt.target.value
+								front := slice(val, 0, idx)
+								back := slice(val, idx, len(val))
+								evt.target.value := front + Tab + back
+								bind(evt.target, 'setSelectionRange')(idx + 1, idx + 1)
+							)
+						}
+					)
+					['b', true] -> markupSection(evt, '**')
+					['i', true] -> markupSection(evt, '_')
+				}
+				scroll: evt => preview := bind(document, 'querySelector')('.preview') :: {
+					() -> ()
+					_ -> matchScrollProgress(evt.target, preview)
+				}
+			}
+			[]
+		)
+	])
+)
 
 PreviewCache := {
 	content: ''
