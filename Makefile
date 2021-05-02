@@ -4,12 +4,11 @@ all: ci
 run:
 	ink src/main.ink
 
-# build app client
+# build app clients
 build:
-	echo '' > static/ink/bundle.js
 	cat static/js/ink.js \
 		static/js/torus.min.js \
-		>> static/ink/bundle.js
+		> static/ink/common.js
 	september translate \
 		lib/stub.ink \
 		vendor/std.ink \
@@ -19,7 +18,19 @@ build:
 		lib/md.ink \
 		lib/torus.js.ink \
 		src/app.js.ink \
-		| tee /dev/stderr >> static/ink/bundle.js
+		| tee /dev/stderr >> static/ink/common.js
+	september translate src/config.js.ink \
+		> static/ink/config.js
+	september translate src/static-config.js.ink \
+		> static/ink/static-config.js
+	cat \
+		static/ink/config.js \
+		static/ink/common.js \
+		> static/ink/bundle.js
+	cat \
+		static/ink/static-config.js \
+		static/ink/common.js \
+		> static/ink/static-bundle.js
 b: build
 
 # build whenever Ink sources change

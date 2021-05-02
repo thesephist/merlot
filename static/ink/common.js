@@ -1,5 +1,3 @@
-Authed__ink_qm__ = true
-
 /**
  * Ink/JavaScript runtime/interop layer
  * implements Ink system interfaces for web and Node JS runtimes

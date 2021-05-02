@@ -1,4 +1,4 @@
-Authed__ink_qm__ = true
+Authed__ink_qm__ = false
 
 /**
  * Ink/JavaScript runtime/interop layer

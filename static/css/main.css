@@ -239,6 +239,16 @@ header nav .button {
     width: 100%;
 }
 
+.file-list:empty::after {
+	content: '📭 No files';
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-text);
+}
+
 .file-list .file-item {
     margin: 2px 12px;
     display: flex;
@@ -339,6 +349,16 @@ header nav .button {
 
 .editor + .preview {
     border-left: 1px solid var(--active-bg);
+}
+
+.preview-content:empty::after {
+	content: '👀 Nothing to preview';
+    display: flex;
+	margin-top: 5em;
+    align-items: center;
+    justify-content: center;
+	text-align: center;
+    color: var(--secondary-text);
 }
 
 .preview-content p,

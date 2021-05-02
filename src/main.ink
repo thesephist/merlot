@@ -116,7 +116,7 @@ addRoute('/view/*fileName', params => (req, end) => req.method :: {
 })
 
 addRoute('/static/*staticPath', params => serveStatic(params.staticPath))
-addRoute('/', params => serveStatic('index.html'))
+addRoute('/', params => serveStatic('dyn-index.html'))
 
 start := () => (
 	end := (server.start)(Port)

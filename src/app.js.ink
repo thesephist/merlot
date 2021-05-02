@@ -29,7 +29,7 @@ matchScrollProgress := (from, to) => (
 	}
 )
 
-withFetch := (url, opts, cb) => (
+withPersistedFetch := (url, opts, cb) => (
 	State.loading? := true
 	render()
 
@@ -42,6 +42,73 @@ withFetch := (url, opts, cb) => (
 		cb(data)
 	))
 )
+
+getItem := bind(localStorage, 'getItem')
+setItem := bind(localStorage, 'setItem')
+removeItem := bind(localStorage, 'removeItem')
+withLocalFetch := (url, opts, cb) => url :: {
+	'/doc/' -> opts.method :: {
+		() -> cb(getItem('files'))
+		'GET' -> cb(getItem('files'))
+		_ -> bind(console, 'warn')(
+			bind('Invalid request', 'valueOf')()
+			bind(url, 'valueOf')()
+			opts
+		)
+	}
+	_ -> opts.method :: {
+		() -> cb(getItem(url))
+		'GET' -> cb(getItem(url))
+		'PUT' -> (
+			files := filter(split(getItem('files'), Newline), s => len(s) > 0)
+			fileName := (
+				urlParts := split(url, '/')
+				urlParts.(len(urlParts) - 1)
+			)
+
+			` add file to files list if not exists already `
+			(sub := i => i :: {
+				~1 -> files.len(files) := fileName
+				_ -> files.(i) :: {
+					fileName -> ()
+					_ -> sub(i - 1)
+				}
+			})(len(files))
+
+			sort!(files)
+			setItem('files', cat(files, Newline))
+
+			setItem(url, opts.body)
+			cb('')
+		)
+		'DELETE' -> (
+			removeItem(url, opts.body)
+			cb('')
+		)
+		_ -> bind(console, 'warn')(
+			bind('Invalid request', 'valueOf')()
+			bind(url, 'valueOf')()
+			opts
+		)
+	}
+}
+
+` Merlot is deployed under two different configurations: one "dynamic" version
+that's authenticated and persists data to a database on the server, and one
+"static" version that's deployed as a static site and persists data to browser
+localStorage. We build both of these versions on top of the exact same codebase
+with one switch: the "Authed?" flag. Depending on this flag, we alter which
+withFetch() function we use. When Authed? = false, we use withFetch to talk to
+localStorage. `
+withFetch := (Authed? :: {
+	true -> withPersistedFetch
+	_ -> (
+		getItem('files') :: {
+			() -> setItem('files', '')
+		}
+		withLocalFetch
+	)
+})
 
 prompt := (str, confirmText, withResp) => (
 	r := Renderer(document.body)
@@ -63,8 +130,14 @@ prompt := (str, confirmText, withResp) => (
 	]))
 
 	handleKeys := evt => evt.key :: {
-		'Enter' -> callback(input.value)
-		'Escape' -> callback(())
+		'Enter' -> (
+			bind(evt, 'preventDefault')()
+			callback(input.value)
+		)
+		'Escape' -> (
+			bind(evt, 'preventDefault')()
+			callback(())
+		)
 	}
 
 	input := bind(document, 'querySelector')('.modal-input')
@@ -101,8 +174,14 @@ confirm := (str, withResp) => (
 	bind(input, 'focus')()
 
 	handleKeys := evt => evt.key :: {
-		'Enter' -> callback(true)
-		'Escape' -> callback(false)
+		'Enter' -> (
+			bind(evt, 'preventDefault')()
+			callback(true)
+		)
+		'Escape' -> (
+			bind(evt, 'preventDefault')()
+			callback(false)
+		)
 	}
 
 	bind(document, 'addEventListener')('keydown', handleKeys)
@@ -151,11 +230,14 @@ Header := () => h('header', [], [
 		hae('button', ['button', 'tooltip-left'], {title: 'Change color scheme'}, {
 			click: () => toggleColorScheme()
 		}, [State.colorScheme :: {'light' -> '☽', 'dark' -> '☉'}])
-		ha('a', ['button', 'tooltip-left'], {
-			href: f('/view/{{0}}', [State.activeFile])
-			target: '_blank'
-			title: 'Open a preview in its own tab'
-		}, ['Share'])
+		Authed? :: {
+			false -> ()
+			_ -> ha('a', ['button', 'tooltip-left'], {
+				href: f('/view/{{0}}', [State.activeFile])
+				target: '_blank'
+				title: 'Open a preview in its own tab'
+			}, ['Share'])
+		}
 		hae('button', ['button', 'tooltip-left'], {title: 'Change editor mode'}, {click: toggleMode}, [State.editor.mode :: {
 			'edit' -> 'Preview'
 			'preview' -> 'Full'
@@ -236,7 +318,9 @@ handleEditorInput := delay(
 )
 
 Editor := () => (
-	handleInput := evt => State.stale? :: {
+	readOnly? := State.stale? | State.activeFile = ()
+
+	handleInput := evt => readOnly? :: {
 		true -> render()
 		_ -> (
 			State.content := evt.target.value
@@ -275,7 +359,7 @@ Editor := () => (
 	h('div', ['editor'], [
 		hae(
 			'textarea'
-			['editor-textarea', State.stale? :: {true -> 'readonly', _ -> ''}]
+			['editor-textarea', readOnly? :: {true -> 'readonly', _ -> ''}]
 			{
 				placeholder: 'Say something...'
 				value: State.content
@@ -312,7 +396,7 @@ Editor := () => (
 )
 
 PreviewCache := {
-	content: ''
+	content: ()
 	preview: ()
 }
 Preview := () => hae(
@@ -353,9 +437,10 @@ State := {
 		_ -> true
 	}
 	loading?: false
+	stale?: false
 	files: []
 	activeFile: ()
-	content: 'loading editor...'
+	content: ''
 	colorScheme: bind(localStorage, 'getItem')('colorScheme') :: {
 		'dark' -> 'dark'
 		_ -> 'light'
@@ -510,7 +595,7 @@ bind(document.documentElement, 'addEventListener')('keydown', handleKeyEvents)
 
 ` fetch initial data `
 withFetch('/doc/', {}, data => (
-	files := split(data, Newline)
+	files := filter(split(data, Newline), s => len(s) > 0)
 	State.files := files
 	render()
 
