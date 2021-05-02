@@ -163,6 +163,81 @@ run := (m, t) => (
 			}]
 		}])
 
+		t('simple unchecked checkbox', parse('[ ]'), [{
+			tag: 'p'
+			children: [{
+				tag: 'checkbox'
+				checked: false
+			}]
+		}])
+		t('simple checked checkbox', parse('[x]'), [{
+			tag: 'p'
+			children: [{
+				tag: 'checkbox'
+				checked: true
+			}]
+		}])
+		t('checked and unchecked checkboxes inline', parse('a [ ] b [x][ ] c'), [{
+			tag: 'p'
+			children: [
+				'a '
+				{
+					tag: 'checkbox'
+					checked: false
+				}
+				' b '
+				{
+					tag: 'checkbox'
+					checked: true
+				}
+				{
+					tag: 'checkbox'
+					checked: false
+				}
+				' c'
+			]
+		}])
+		t('almost-checkboxes with too much inside', parse('[  ] [x ] ['), [{
+			tag: 'p'
+			children: ['[  ] [x ] [']
+		}])
+		t('checkbox inside marks', parse('**bold [x]**'), [{
+			tag: 'p'
+			children: [{
+				tag: 'strong'
+				children: [
+					'bold '
+					{
+						tag: 'checkbox'
+						checked: true
+					}
+				]
+			}]
+		}])
+		t('checkbox inside list item', parse('- [ ] do this now!'), [{
+			tag: 'ul'
+			children: [{
+				tag: 'li'
+				children: [
+					{
+						tag: 'checkbox'
+						checked: false
+					}
+					' do this now!'
+				]
+			}]
+		}])
+		t('checkbox inside header', parse('# March madness [x]'), [{
+			tag: 'h1'
+			children: [
+				'March madness '
+				{
+					tag: 'checkbox'
+					checked: true
+				}
+			]
+		}])
+
 		t('plain text link', parse('[text](dst)'), [{
 			tag: 'p'
 			children: [{
@@ -805,6 +880,24 @@ hr
 				}]
 			}])
 			'<p><a href="some url"><em>click here</em></a></p>'
+		)
+		t(
+			'checkboxes'
+			compile([{
+				tag: 'p'
+				children: [
+					{
+						tag: 'checkbox'
+						checked: true
+					}
+					' followed by '
+					{
+						tag: 'checkbox'
+						checked: false
+					}
+				]
+			}])
+			'<p><input type="checkbox" checked /> followed by <input type="checkbox"  /></p>'
 		)
 		t(
 			'image'

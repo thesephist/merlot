@@ -44,6 +44,7 @@ Node := {
 	UList: 'ul'
 	OList: 'ol'
 	Item: 'li'
+	Checkbox: 'checkbox'
 	Hr: 'hr'
 	Empty: '-empty'
 	RawHTML: '-raw-html'
@@ -160,6 +161,20 @@ parseText := tokens => (
 		'~' -> handleDelimitedRange('~', Node.Strike, nodes, sub)
 		'[' -> range := readUntilMatchingDelim('[') :: {
 			() -> sub(nodes.len(nodes) := tok)
+			['x'] -> (
+				next() ` swallow matching ] `
+				sub(nodes.len(nodes) := {
+					tag: Node.Checkbox
+					checked: true
+				})
+			)
+			[' '] -> (
+				next() ` swallow matching ] `
+				sub(nodes.len(nodes) := {
+					tag: Node.Checkbox
+					checked: false
+				})
+			)
 			_ -> c := (next() ` swallow matching ] `, next()) :: {
 				'(' -> urlRange := readUntilMatchingDelim(c) :: {
 					() -> sub(nodes.len(nodes) :=
@@ -505,6 +520,10 @@ compileNode := node => type(node) :: {
 		Node.UList -> wrapTag('ul', node)
 		Node.OList -> wrapTag('ol', node)
 		Node.Item -> wrapTag('li', node)
+		Node.Checkbox -> f('<input type="checkbox" {{0}} />', [node.checked :: {
+			true -> 'checked'
+			_ -> ''
+		}])
 		Node.Hr -> '<hr/>'
 		Node.RawHTML -> node.children.0
 		_ -> f('<span style="color:red">Unknown Markdown node {{0}}</span>', [string(node)])

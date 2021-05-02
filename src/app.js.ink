@@ -424,6 +424,11 @@ Preview := () => hae(
 			bind(div.classList, 'add')('preview-content')
 			div.innerHTML := transform(State.content)
 
+			` do not let the preview's checkboxes be interactive `
+			div.onclick := evt => evt.target.tagName :: {
+				'INPUT' -> bind(evt, 'preventDefault')()
+			}
+
 			PreviewCache.content := State.content
 			PreviewCache.preview := div
 
