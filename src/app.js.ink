@@ -533,7 +533,12 @@ focusEditor := () => ta := bind(document, 'querySelector')('.editor-textarea') :
 }
 
 setDefaultActiveFile := () => State.files :: {
-	[] -> ()
+	[] -> (
+		document.title := 'Merlot'
+		State.activeFile := ()
+		State.content := ''
+		render()
+	)
 	_ -> setActive(State.files.0)
 }
 
