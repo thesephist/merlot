@@ -117,6 +117,7 @@ addRoute('/view/*fileName', params => (req, end) => req.method :: {
 
 addRoute('/static/*staticPath', params => serveStatic(params.staticPath))
 addRoute('/favicon.ico', params => serveStatic('favicon.ico'))
+addRoute('/manifest.json', params => serveStatic('manifest.json'))
 addRoute('/', params => serveStatic('dyn-index.html'))
 
 start := () => (
