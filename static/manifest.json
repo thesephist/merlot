@@ -1,0 +1,8 @@
+{
+  "short_name": "Merlot",
+  "name": "Merlot",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#f9fafb",
+  "background_color": "#f9fafb"
+}
