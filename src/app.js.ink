@@ -82,6 +82,14 @@ withLocalFetch := (url, opts, cb) => url :: {
 			cb('')
 		)
 		'DELETE' -> (
+			fileName := (
+				urlParts := split(url, '/')
+				urlParts.(len(urlParts) - 1)
+			)
+			files := filter(split(getItem('files'), Newline), s => len(s) > 0)
+			files := filter(files, s => ~(s = fileName))
+			setItem('files', cat(files, Newline))
+
 			removeItem(url, opts.body)
 			cb('')
 		)
