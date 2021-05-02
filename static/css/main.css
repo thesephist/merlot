@@ -521,7 +521,7 @@ header nav .button {
         left: 100%;
         width: calc(100vw - var(--sidebar-width));
         background: rgba(0, 0, 0, 0.6);
-        z-index: 20; /* above header */
+        z-index: 5; /* below header */
     }
 
     .modal {
