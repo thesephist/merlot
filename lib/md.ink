@@ -177,8 +177,7 @@ parseText := tokens => (
 			)
 			_ -> c := (next() ` swallow matching ] `, next()) :: {
 				'(' -> urlRange := readUntilMatchingDelim(c) :: {
-					() -> sub(nodes.len(nodes) :=
-						tok + cat(range, '') + ']' + c)
+					() -> sub(nodes.len(nodes) := tok + cat(range, '') + ']' + c)
 					_ -> (
 						next() ` swallow matching ) `
 						link := {
@@ -195,11 +194,26 @@ parseText := tokens => (
 		}
 		'!' -> peek() :: {
 			'[' -> range := (next(), readUntilMatchingDelim('[')) :: {
-				() -> sub(nodes.len(nodes) := tok)
+				() -> sub(nodes.len(nodes) := tok + '[')
+				['x'] -> (
+					next() ` swallow matching ] `
+					nodes.len(nodes) := tok
+					sub(nodes.len(nodes) := {
+						tag: Node.Checkbox
+						checked: true
+					})
+				)
+				[' '] -> (
+					next() ` swallow matching ] `
+					nodes.len(nodes) := tok
+					sub(nodes.len(nodes) := {
+						tag: Node.Checkbox
+						checked: false
+					})
+				)
 				_ -> c := (next() ` swallow matching ] `, next()) :: {
 					'(' -> urlRange := readUntilMatchingDelim(c) :: {
-						() -> sub(nodes.len(nodes) :=
-							tok + cat(range, '') + ']' + c)
+						() -> sub(nodes.len(nodes) := tok + '[' + cat(range, '') + ']' + c)
 						_ -> (
 							next() ` swallow matching ) `
 							img := {
@@ -210,8 +224,8 @@ parseText := tokens => (
 							sub(nodes.len(nodes) := img)
 						)
 					}
-					() -> sub(nodes.len(nodes) := tok + cat(range, '') + ']')
-					_ -> sub(nodes.len(nodes) := tok + cat(range, '') + ']' + c)
+					() -> sub(nodes.len(nodes) := tok + '[' + cat(range, '') + ']')
+					_ -> sub(nodes.len(nodes) := tok + '[' + cat(range, '') + ']' + c)
 				}
 			}
 			_ -> sub(nodes.len(nodes) := tok)

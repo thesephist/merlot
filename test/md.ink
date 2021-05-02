@@ -237,6 +237,22 @@ run := (m, t) => (
 				}
 			]
 		}])
+		t('checkboxes followed by ! (regression due to img syntax)', parse('![x]![ ](x'), [{
+			tag: 'p'
+			children: [
+				'!'
+				{
+					tag: 'checkbox'
+					checked: true
+				}
+				'!'
+				{
+					tag: 'checkbox'
+					checked: false
+				}
+				'(x'
+			]
+		}])
 
 		t('plain text link', parse('[text](dst)'), [{
 			tag: 'p'
@@ -320,9 +336,9 @@ run := (m, t) => (
 				'(second)'
 			]
 		}])
-		t('incomplete link', parse('[this is an incomplete](link'), [{
+		t('incomplete link syntaxes', parse('[ab [ab] [ab](cd'), [{
 			tag: 'p'
-			children: ['[this is an incomplete](link']
+			children: ['[ab [ab] [ab](cd']
 		}])
 		t('link in surrounding text', parse('ab [cd](ef) ghi'), [{
 			tag: 'p'
@@ -384,6 +400,10 @@ run := (m, t) => (
 				}
 				' ghi'
 			]
+		}])
+		t('incomplete image syntaxes', parse('![ab ![ab] ![ab](cd'), [{
+			tag: 'p'
+			children: ['![ab ![ab] ![ab](cd']
 		}])
 	)
 
