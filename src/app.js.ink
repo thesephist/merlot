@@ -440,7 +440,7 @@ Preview := () => hae(
 ` globals `
 
 DefaultMode := () => Mobile? :: {
-	true -> 'preview'
+	true -> 'edit'
 	_ -> 'both'
 }
 
