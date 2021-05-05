@@ -3,6 +3,8 @@
 ` persist files locally if this file is included `
 Authed? := false
 
+bind(localStorage, 'getItem')('files') :: {
+	() -> (
 ` create a dummy file for initial load on static deploy `
 bind(localStorage, 'setItem')('files', 'Welcome to Merlot!')
 bind(localStorage, 'setItem')('/doc/Welcome to Merlot!', '# Welcome to Merlot 🍷
@@ -32,4 +34,6 @@ Features like:
 I\'m hoping to use Merlot as my main, full-time writing app for the thousands of words I write each week, and continue improving the app as I put it through its paces!
 
 \\- Linus')
+		  )
+}
 

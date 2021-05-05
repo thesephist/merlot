@@ -473,14 +473,18 @@ setActive := file => (
 		State.stale? := false
 		render(State.content := data)
 
-		requestAnimationFrame(() => (
-			requestAnimationFrame(() => (
-				textarea := bind(document, 'querySelector')('.editor-textarea') :: {
-					() -> ()
-					_ -> textarea.scrollTop := 0
-				}
-			))
-		))
+		` this double-rAF trick lets us schedule the callback "after the next
+		frame gets rendered", which we need so that we can accurately set the
+		scrollTop of the text editor. `
+		requestAnimationFrame(() => requestAnimationFrame(() => (
+			textarea := bind(document, 'querySelector')('.editor-textarea') :: {
+				() -> ()
+				_ -> (
+					bind(textarea, 'setSelectionRange')(0, 0)
+					textarea.scrollTop := 0
+				)
+			}
+		)))
 	))
 )
 
