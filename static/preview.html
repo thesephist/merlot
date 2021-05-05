@@ -9,11 +9,11 @@
 
 <style>
 .editPreview {
-	opacity: 0;
-	transition: opacity .2s;
+    opacity: 0;
+    transition: opacity .2s;
 }
 .editPreview:hover {
-	opacity: 1;
+    opacity: 1;
 }
 
 .standalone-footer {
@@ -35,9 +35,11 @@
             Written in
             <a target="_blank" href="https://github.com/thesephist/merlot">Merlot</a>,
             a project by
-            <a target="_blank" href="https://thesephist.com/">Linus</a>.
-            |
-            Rendered in {{ renderTime }}ms.
+            <a target="_blank" href="https://thesephist.com/">Linus</a>
+            ·
+            rendered in {{ renderTime }}ms
+            ·
+            about {{ wordCount }} words
         </p>
     </footer>
 </div>

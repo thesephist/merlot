@@ -13,6 +13,7 @@ filter := std.filter
 slice := std.slice
 readFile := std.readFile
 writeFile := std.writeFile
+split := str.split
 hasSuffix? := str.hasSuffix?
 mimeForPath := mime.forPath
 pctDecode := percent.decode
@@ -23,6 +24,12 @@ transform := md.transform
 
 Port := 7650
 Newline := char(10)
+
+` utility for server-rendering large numbers with commas `
+formatNumber := n => (sub := (acc, n) => n :: {
+	0 -> acc
+	_ -> sub(string(n % 1000) + ',' + acc, floor(n / 1000))
+})(string(n % 1000), floor(n / 1000))
 
 server := (http.new)()
 NotFound := {status: 404, body: 'file not found'}
@@ -106,7 +113,8 @@ addRoute('/view/*fileName', params => (req, end) => req.method :: {
 					body: f(tpl, {
 						fileName: pctDecode(params.fileName)
 						previewHTML: doc
-						renderTime: floor(elapsed * 1000) ` in ms `
+						renderTime: formatNumber(floor(elapsed * 1000)) ` in ms `
+						wordCount: formatNumber(len(split(file, ' ')))
 					})
 				})
 			)
