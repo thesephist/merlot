@@ -387,6 +387,8 @@ Editor := () => (
 								back := slice(val, idx, len(val))
 								evt.target.value := front + Tab + back
 								bind(evt.target, 'setSelectionRange')(idx + 1, idx + 1)
+
+								handleInput(evt)
 							)
 						}
 					)
