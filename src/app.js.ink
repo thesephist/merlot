@@ -473,10 +473,14 @@ setActive := file => (
 		State.stale? := false
 		render(State.content := data)
 
-		textarea := bind(document, 'querySelector')('.editor-textarea') :: {
-			() -> ()
-			_ -> textarea.scrollTop := 0
-		}
+		requestAnimationFrame(() => (
+			requestAnimationFrame(() => (
+				textarea := bind(document, 'querySelector')('.editor-textarea') :: {
+					() -> ()
+					_ -> textarea.scrollTop := 0
+				}
+			))
+		))
 	))
 )
 
