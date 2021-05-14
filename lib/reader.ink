@@ -14,16 +14,6 @@ chars) or a list of strings. `
 Reader := s => (
 	S := {i: 0}
 
-	` polymorphic helper fns `
-	base := (type(s) :: {
-		'string' -> () => ''
-		_ -> () => []
-	})
-	push := (type(s) :: {
-		'string' -> (a, b) => a + b
-		_ -> (a, b) => a.len(a) := b
-	})
-
 	peek := () => s.(S.i)
 	last := () => s.(S.i - 1)
 	back := () => S.i :: {
