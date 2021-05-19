@@ -26,6 +26,13 @@ run := (m, t) => (
 			tag: 'p'
 			children: ['- x86_64']
 		}])
+		t('a line ending with a backslash parses correctly (backslash ignored)', parse('thing \\\\'), [{
+			tag: 'p'
+			children: [
+				'thing '
+				{tag: 'br'}
+			]
+		}])
 		t('unpaired delimiters for inline marks present as normal text', parse('** and _ and ~ and `'), [{
 			tag: 'p'
 			children: ['** and _ and ~ and `']
