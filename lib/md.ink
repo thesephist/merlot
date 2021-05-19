@@ -13,6 +13,7 @@ ws? := str.ws?
 digit? := str.digit?
 letter? := str.letter?
 hasPrefix? := str.hasPrefix?
+hasSuffix? := str.hasSuffix?
 trimPrefix := str.trimPrefix
 replace := str.replace
 split := str.split
@@ -45,6 +46,7 @@ Node := {
 	OList: 'ol'
 	Item: 'li'
 	Checkbox: 'checkbox'
+	Br: 'br'
 	Hr: 'hr'
 	Empty: '-empty'
 	RawHTML: '-raw-html'
@@ -485,8 +487,17 @@ parseParagraph := lineReader => (
 	children := (sub := lines => lineNodeType(peek()) :: {
 		Node.P -> (
 			text := next()
-			`` lines.len(lines) := ' '
-			sub(append(lines, parseText(tokenizeText(text))))
+			[hasSuffix?(text, '  '), text.(len(text) - 1) = '\\'] :: {
+				[true, _] -> (
+					append(lines, parseText(tokenizeText(slice(text, 0, len(text) - 2))))
+					sub(lines.len(lines) := {tag: Node.Br})
+				)
+				[_, true] -> (
+					append(lines, parseText(tokenizeText(slice(text, 0, len(text) - 1))))
+					sub(lines.len(lines) := {tag: Node.Br})
+				)
+				_ -> sub(append(lines, parseText(tokenizeText(text))))
+			}
 		)
 		_ -> lines
 	})([])
@@ -538,6 +549,7 @@ compileNode := node => type(node) :: {
 			true -> 'checked'
 			_ -> ''
 		}])
+		Node.Br -> '<br/>'
 		Node.Hr -> '<hr/>'
 		Node.RawHTML -> node.children.0
 		_ -> f('<span style="color:red">Unknown Markdown node {{0}}</span>', [string(node)])

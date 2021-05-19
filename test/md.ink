@@ -427,6 +427,29 @@ run := (m, t) => (
 				children: ['d']
 			}
 		])
+		t('line that ends with two spaces for <br />', parseLines(['_hello_  ', 'world']), [{
+			tag: 'p'
+			children: [
+				{
+					tag: 'em'
+					children: ['hello']
+				}
+				{tag: 'br'}
+				'world'
+			]
+		}])
+		t('line that ends with two spaces for <br />', parseLines(['_hello_ \\', 'world']), [{
+			tag: 'p'
+			children: [
+				{
+					tag: 'em'
+					children: ['hello']
+				}
+				' '
+				{tag: 'br'}
+				'world'
+			]
+		}])
 
 		t('one line block quote', parse('>hello world'), [{
 			tag: 'q'
@@ -1034,6 +1057,40 @@ second line
 				]
 			}])
 			'<ul><li>first<ul><li>sub-first</li><li>sub-first</li></ul></li><li>second</li></ul>'
+		)
+
+		t(
+			'horizontal rule'
+			compile([
+				{
+					tag: 'p'
+					children: ['above line']
+				}
+				{
+					tag: 'hr'
+				}
+				{
+					tag: 'p'
+					children: ['below line']
+				}
+			])
+			'<p>above line</p><hr/><p>below line</p>'
+		)
+		t(
+			'line break within paragraph'
+			compile([
+				{
+					tag: 'p'
+					children: [
+						'before break'
+						{
+							tag: 'br'
+						}
+						'after break'
+					]
+				}
+			])
+			'<p>before break<br/>after break</p>'
 		)
 
 		t(
