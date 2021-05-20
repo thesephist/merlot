@@ -74,7 +74,6 @@ There is not a public deployment of the **dynamic build**. To deploy this versio
 There are a few features that I'd like to include in Merlot and the Markdown library that aren't there yet.
 
 - Support for bulleted lists starting with `*` instead of `-`
-- Support for numbered lists
 - Support for multiple paragraphs and rich blocks inside list items
 - Syntax highlighting on code blocks with language tags
 - Class syntax for inline images

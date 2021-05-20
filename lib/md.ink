@@ -7,11 +7,13 @@ map := std.map
 filter := std.filter
 reduce := std.reduce
 each := std.each
+every := std.every
 append := std.append
 f := std.format
 ws? := str.ws?
 digit? := str.digit?
 letter? := str.letter?
+index := str.index
 hasPrefix? := str.hasPrefix?
 hasSuffix? := str.hasSuffix?
 trimPrefix := str.trimPrefix
@@ -241,10 +243,54 @@ parseText := tokens => (
 	unifyTextNodes(nodes, '')
 )
 
-listItemLine? := line => line :: {
+uListItemLine? := line => line :: {
 	() -> false
 	_ -> hasPrefix?(trimPrefix(trimPrefix(line, ' '), Tab), '- ')
 }
+
+oListItemLine? := line => line :: {
+	() -> false
+	_ -> (
+		trimmedStart := trimPrefix(trimPrefix(line, ' '), Tab)
+		dotIndex := index(trimmedStart, '. ') :: {
+			~1 -> false
+			0 -> false
+			_ -> every(map(slice(trimmedStart, 0, dotIndex), digit?))
+		}
+	)
+}
+
+listItemLine? := line => uListItemLine?(line) | oListItemLine?(line)
+
+trimUListGetLevel := reader => (
+	level := len((reader.readUntil)('-'))
+	each('- ', reader.next)
+	level
+)
+
+trimOListGetLevel := reader => (
+	peek := reader.peek
+	next := reader.next
+
+	` read while whitespace `
+	level := (sub := i => ws?(peek()) :: {
+		true -> (
+			next()
+			sub(i + 1)
+		)
+		false -> i
+	})(0)
+
+	` swallow until dot `
+	(reader.readUntil)('.')
+	next()
+
+	` if space after dot, swallow it `
+	(reader.peek)() :: {
+		' ' -> next()
+	}
+	level
+)
 
 ` lineNodeType reports the node type of a particular markdown line for parsing. `
 lineNodeType := line => true :: {
@@ -261,7 +307,8 @@ lineNodeType := line => true :: {
 	hasPrefix?(line, '---') -> Node.Hr
 	hasPrefix?(line, '***') -> Node.Hr
 	hasPrefix?(line, '!html ') -> Node.RawHTML
-	listItemLine?(line) -> Node.Item
+	uListItemLine?(line) -> Node.UList
+	oListItemLine?(line) -> Node.OList
 	_ -> Node.P
 }
 
@@ -279,16 +326,17 @@ parseDoc := lineReader => (
 	peek := lineReader.peek
 	next := lineReader.next
 
-	(sub := doc => lineNodeType(peek()) :: {
-		Node.H1 -> sub(doc.len(doc) := parseHeader(Node.H1, lineReader))
-		Node.H2 -> sub(doc.len(doc) := parseHeader(Node.H2, lineReader))
-		Node.H3 -> sub(doc.len(doc) := parseHeader(Node.H3, lineReader))
-		Node.H4 -> sub(doc.len(doc) := parseHeader(Node.H4, lineReader))
-		Node.H5 -> sub(doc.len(doc) := parseHeader(Node.H5, lineReader))
-		Node.H6 -> sub(doc.len(doc) := parseHeader(Node.H6, lineReader))
+	(sub := doc => nodeType := lineNodeType(peek()) :: {
+		Node.H1 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
+		Node.H2 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
+		Node.H3 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
+		Node.H4 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
+		Node.H5 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
+		Node.H6 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
 		Node.Q -> sub(doc.len(doc) := parseBlockQuote(lineReader))
 		Node.Pre -> sub(doc.len(doc) := parseCodeBlock(lineReader))
-		Node.Item -> sub(doc.len(doc) := parseList(lineReader))
+		Node.UList -> sub(doc.len(doc) := parseList(lineReader, nodeType))
+		Node.OList -> sub(doc.len(doc) := parseList(lineReader, nodeType))
 		Node.RawHTML -> sub(doc.len(doc) := parseRawHTML(lineReader))
 		Node.P -> sub(doc.len(doc) := parseParagraph(lineReader))
 		Node.Hr -> (
@@ -421,7 +469,7 @@ parseRawHTML := lineReader => (
 	}
 )
 
-parseList := lineReader => (
+parseList := (lineReader, listType) => (
 	peek := lineReader.peek
 	next := lineReader.next
 
@@ -432,9 +480,14 @@ parseList := lineReader => (
 			The current convention seems to be that if there is at least one
 			multi-paragraph listItem in a UL, every listItem in the UL gets
 			<p>s rather than inline text nodes as content. `
-			reader := Reader(next())
-			level := len((reader.readUntil)('-'))
-			each('- ', reader.next)
+			line := next()
+			lineType := lineNodeType(line)
+			reader := Reader(line)
+			trimmer := (lineType :: {
+				Node.UList -> trimUListGetLevel
+				Node.OList -> trimOListGetLevel
+			})
+			level := trimmer(reader)
 
 			text := (reader.readUntilEnd)()
 			listItem := {
@@ -447,12 +500,19 @@ parseList := lineReader => (
 			lastItem := items.(len(items) - 1) :: {
 				() -> sub(items.len(items) := listItem)
 				_ -> lastItem.level :: {
-					level -> sub(items.len(items) := listItem)
+					level -> lineType :: {
+						` if the same type of list, continue; otherwise, re-parse `
+						listType -> sub(items.len(items) := listItem)
+						_ -> (
+							(lineReader.back)()
+							items
+						)
+					}
 					_ -> lastItem.level < level :: {
 						` indent in: begin parsing a separate list `
 						true -> (
 							(lineReader.back)()
-							list := parseList(lineReader)
+							list := parseList(lineReader, lineType)
 							lastItem.children.len(lastItem.children) := list
 							sub(items)
 						)
@@ -478,7 +538,7 @@ parseList := lineReader => (
 	})
 
 	{
-		tag: Node.UList
+		tag: listType
 		children: children
 	}
 )

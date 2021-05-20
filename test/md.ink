@@ -582,6 +582,13 @@ run := (m, t) => (
 				children: ['hello world']
 			}]
 		}])
+		t('if unordered list prefixed twice, removes only 1 bullet', parse('- - Thing.'), [{
+			tag: 'ul'
+			children: [{
+				tag: 'li'
+				children: ['- Thing.']
+			}]
+		}])
 		t('small unordered list', parseLines(['- a', '- b']), [{
 			tag: 'ul'
 			children: [
@@ -769,6 +776,224 @@ run := (m, t) => (
 				children: ['last random line']
 			}
 		])
+
+		t('ordered list with one item', parse('1. hello world'), [{
+			tag: 'ol'
+			children: [{
+				tag: 'li'
+				children: ['hello world']
+			}]
+		}])
+		t('ordered list with more than one item', parseLines(['1. hello', '2. goodbye']), [{
+			tag: 'ol'
+			children: [
+				{
+					tag: 'li'
+					children: ['hello']
+				}
+				{
+					tag: 'li'
+					children: ['goodbye']
+				}
+			]
+		}])
+		t('ordered list with formatted text', parseLines(['1. *italic* text', '2. __bold__ text']), [{
+			tag: 'ol'
+			children: [
+				{
+					tag: 'li'
+					children: [
+						{
+							tag: 'em'
+							children: ['italic']
+						}
+						' text'
+					]
+				}
+				{
+					tag: 'li'
+					children: [
+						{
+							tag: 'strong'
+							children: ['bold']
+						}
+						' text'
+					]
+				}
+			]
+		}])
+		t('list item with both prefixes, bullet first', parse('- 1. Hello'), [{
+			tag: 'ul'
+			children: [{
+				tag: 'li'
+				children: ['1. Hello']
+			}]
+		}])
+		t('list item with both prefixes, number first', parse('1. - Hello'), [{
+			tag: 'ol'
+			children: [{
+				tag: 'li'
+				children: ['- Hello']
+			}]
+		}])
+
+		lines := [
+			'1. first level'
+			'  2. second level'
+			'3. first level again'
+		]
+		t('ordered list with nesting', parseLines(lines), [{
+			tag: 'ol'
+			children: [
+				{
+					tag: 'li'
+					children: [
+						'first level'
+						{
+							tag: 'ol'
+							children: [{
+								tag: 'li'
+								children: ['second level']
+							}]
+						}
+					]
+				}
+				{
+					tag: 'li'
+					children: ['first level again']
+				}
+			]
+		}])
+
+		lines := [
+			'12. a'
+			'100. b'
+			'999. c d'
+		]
+		t('ordered list with incorrect numbering', parseLines(lines), [{
+			tag: 'ol'
+			children: [
+				{
+					tag: 'li'
+					children: ['a']
+				}
+				{
+					tag: 'li'
+					children: ['b']
+				}
+				{
+					tag: 'li'
+					children: ['c d']
+				}
+			]
+		}])
+
+		lines := [
+			'- A'
+			'- B'
+			'3. C'
+			'4. D'
+		]
+		t('mixed list of ordered and unordered list gets separated', parseLines(lines), [
+			{
+				tag: 'ul'
+				children: [
+					{tag: 'li', children: ['A']}
+					{tag: 'li', children: ['B']}
+				]
+			}
+			{
+				tag: 'ol'
+				children: [
+					{tag: 'li', children: ['C']}
+					{tag: 'li', children: ['D']}
+				]
+			}
+		])
+
+		lines := [
+			'1. first'
+			'2. second'
+			'3. third'
+			'  - A'
+			'    1. A subpoint'
+			'  - B'
+			'4. fourth'
+			'5. fifth'
+			'  100. C'
+			'  101. D'
+		]
+		t('mixed nested ordered and unordered list', parseLines(lines), [{
+			tag: 'ol'
+			children: [
+				{tag: 'li', children: ['first']}
+				{tag: 'li', children: ['second']}
+				{
+					tag: 'li'
+					children: [
+						'third'
+						{
+							tag: 'ul'
+							children: [
+								{tag: 'li', children: [
+									'A'
+									{
+										tag: 'ol'
+										children: [{tag: 'li', children: ['A subpoint']}]
+									}
+								]}
+								{tag: 'li', children: ['B']}
+							]
+						}
+					]
+				}
+				{tag: 'li', children: ['fourth']}
+				{
+					tag: 'li'
+					children: [
+						'fifth'
+						{
+							tag: 'ol'
+							children: [
+								{tag: 'li', children: ['C']}
+								{tag: 'li', children: ['D']}
+							]
+						}
+					]
+				}
+			]
+		}])
+
+		lines := [
+			'1. header'
+			'  - bulleted'
+			'  2. numbered'
+		]
+		t('mixed list type under a level of nesting', parseLines(lines), [{
+			tag: 'ol'
+			children: [{tag: 'li', children: [
+				'header'
+				{
+					tag: 'ul'
+					children: [{tag: 'li', children: ['bulleted']}]
+				}
+				{
+					tag: 'ol'
+					children: [{tag: 'li', children: ['numbered']}]
+				}
+			]}]
+		}])
+
+		lines := [
+			'. first'
+			' . second'
+			'1.third'
+			'1a. fourth'
+		]
+		t('numbered list without incorrect prefix does not parse as list', parseLines(lines), [{
+			tag: 'p'
+			children: ['. first  . second 1.third 1a. fourth']
+		}])
 
 		t('one line code block', parseLines(['```', 'hello **not bold**', '```']), [{
 			tag: 'pre'
