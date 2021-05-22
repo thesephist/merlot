@@ -1096,9 +1096,9 @@ hr
 			'hello world'
 		)
 		t(
-			'HTML is escaped properly'
-			compile(['<!-- comment --> <div>'])
-			'&lt;!-- comment --> &lt;div>'
+			'dangerous HTML characters < and & are escaped safely'
+			compile(['<hi> & <bye> &amp;'])
+			'&lt;hi> &amp; &lt;bye> &amp;amp;'
 		)
 		t(
 			'single paragraph'
