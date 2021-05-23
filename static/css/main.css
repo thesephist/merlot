@@ -403,16 +403,11 @@ header nav .button {
     padding: 0;
 }
 
-.preview-content q {
+.preview-content blockquote {
+    margin: 0;
     border-left: 4px solid var(--active-bg);
     padding-left: 1em;
     display: block;
-}
-
-.preview-content q::before,
-.preview-content q::after {
-    content: unset;
-    display: none;
 }
 
 .button.editPreview {

@@ -459,14 +459,14 @@ run := (m, t) => (
 		}])
 
 		t('one line block quote', parse('>hello world'), [{
-			tag: 'q'
+			tag: 'blockquote'
 			children: [{
 				tag: 'p'
 				children: ['hello world']
 			}]
 		}])
 		t('multiline block quote', parseLines(['>hello world', '>goodbye!']), [{
-			tag: 'q'
+			tag: 'blockquote'
 			children: [
 				{
 					tag: 'p'
@@ -480,7 +480,7 @@ run := (m, t) => (
 				children: ['first']
 			}
 			{
-				tag: 'q'
+				tag: 'blockquote'
 				children: [{
 					tag: 'p'
 					children: ['blockquote!']
@@ -493,7 +493,7 @@ run := (m, t) => (
 		])
 		t('multiline block quote in text', parseLines(['>blockquote!', '>continued *here*', 'second']), [
 			{
-				tag: 'q'
+				tag: 'blockquote'
 				children: [
 					{
 						tag: 'p'
@@ -513,14 +513,14 @@ run := (m, t) => (
 			}
 		])
 		t('quoted block inside quoted block', parseLines(['>layer 1', '>>layer 2', '>>layer 2', '>layer 1']), [{
-			tag: 'q'
+			tag: 'blockquote'
 			children: [
 				{
 					tag: 'p'
 					children: ['layer 1']
 				}
 				{
-					tag: 'q'
+					tag: 'blockquote'
 					children: [{
 						tag: 'p'
 						children: ['layer 2 layer 2']
@@ -540,7 +540,7 @@ run := (m, t) => (
 			'>2'
 		]
 		t('nested list inside a quoted block', parseLines(lines), [{
-			tag: 'q'
+			tag: 'blockquote'
 			children: [
 				{
 					tag: 'p'

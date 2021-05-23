@@ -40,7 +40,7 @@ Node := {
 	H4: 'h4'
 	H5: 'h5'
 	H6: 'h6'
-	Q: 'q'
+	Quote: 'blockquote'
 	Img: 'img'
 	Pre: 'pre'
 	Code: 'code'
@@ -302,7 +302,7 @@ lineNodeType := line => true :: {
 	hasPrefix?(line, '#### ') -> Node.H4
 	hasPrefix?(line, '##### ') -> Node.H5
 	hasPrefix?(line, '###### ') -> Node.H6
-	hasPrefix?(line, '>') -> Node.Q
+	hasPrefix?(line, '>') -> Node.Quote
 	hasPrefix?(line, '```') -> Node.Pre
 	hasPrefix?(line, '---') -> Node.Hr
 	hasPrefix?(line, '***') -> Node.Hr
@@ -333,7 +333,7 @@ parseDoc := lineReader => (
 		Node.H4 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
 		Node.H5 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
 		Node.H6 -> sub(doc.len(doc) := parseHeader(nodeType, lineReader))
-		Node.Q -> sub(doc.len(doc) := parseBlockQuote(lineReader))
+		Node.Quote -> sub(doc.len(doc) := parseBlockQuote(lineReader))
 		Node.Pre -> sub(doc.len(doc) := parseCodeBlock(lineReader))
 		Node.UList -> sub(doc.len(doc) := parseList(lineReader, nodeType))
 		Node.OList -> sub(doc.len(doc) := parseList(lineReader, nodeType))
@@ -374,7 +374,7 @@ parseBlockQuote := lineReader => (
 	BlockQuotedLineReader := lineReader => (
 
 		returnIfQuoted := line => lineNodeType(line) :: {
-			Node.Q -> slice(line, 1, len(line))
+			Node.Quote -> slice(line, 1, len(line))
 			_ -> ()
 		}
 
@@ -382,7 +382,7 @@ parseBlockQuote := lineReader => (
 		last := () => returnIfQuoted((lineReader.last)())
 		back := () => (lineReader.back)()
 		next := () => lineNodeType((lineReader.peek)()) :: {
-			Node.Q -> trimPrefix((lineReader.next)(), '>')
+			Node.Quote -> trimPrefix((lineReader.next)(), '>')
 			_ -> ()
 		}
 		expect? := () => () `` NOTE: not implemented
@@ -411,7 +411,7 @@ parseBlockQuote := lineReader => (
 	)
 
 	{
-		tag: Node.Q
+		tag: Node.Quote
 		children: parseDoc(BlockQuotedLineReader(lineReader, '>'))
 	}
 )
@@ -594,7 +594,7 @@ compileNode := node => type(node) :: {
 		Node.H4 -> wrapTag('h4', node)
 		Node.H5 -> wrapTag('h5', node)
 		Node.H6 -> wrapTag('h6', node)
-		Node.Q -> wrapTag('q', node)
+		Node.Quote -> wrapTag('blockquote', node)
 		Node.Img -> f('<img alt="{{0}}" src="{{1}}"/>', [
 			node.alt
 			node.src
