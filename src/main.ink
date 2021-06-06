@@ -130,7 +130,7 @@ addRoute('/', params => serveStatic('dyn-index.html'))
 
 start := () => (
 	end := (server.start)(Port)
-	log(f('Lucerne started, listening on 0.0.0.0:{{0}}', [Port]))
+	log(f('Merlot started, listening on 0.0.0.0:{{0}}', [Port]))
 )
 
 start()
