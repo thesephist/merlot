@@ -19,17 +19,13 @@ mimeForPath := mime.forPath
 pctDecode := percent.decode
 
 md := load('../lib/md')
+util := load('../lib/util')
 
 transform := md.transform
+formatNumber := util.formatNumber
 
 Port := 7650
 Newline := char(10)
-
-` utility for server-rendering large numbers with commas `
-formatNumber := n => (sub := (acc, n) => n :: {
-	0 -> acc
-	_ -> sub(string(n % 1000) + ',' + acc, floor(n / 1000))
-})(string(n % 1000), floor(n / 1000))
 
 server := (http.new)()
 NotFound := {status: 404, body: 'file not found'}
