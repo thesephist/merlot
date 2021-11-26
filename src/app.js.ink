@@ -586,19 +586,6 @@ handleKeyEvents := evt => [evt.key, evt.metaKey | evt.ctrlKey] :: {
 		bind(evt, 'preventDefault')
 		window.open(f('/view/{{0}}', [State.activeFile]), '_blank')
 	)
-	[_, true] -> keyNum := number(evt.key) :: {
-		() -> ()
-		_ -> (
-			selection := State.files.(keyNum :: {
-				0 -> 9
-				_ -> keyNum - 1
-			})
-			selection :: {
-				() -> ()
-				_ -> setActive(selection)
-			}
-		)
-	}
 }
 
 render := () => (
