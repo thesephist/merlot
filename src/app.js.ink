@@ -118,16 +118,37 @@ withFetch := (Authed? :: {
 	)
 })
 
-prompt := (str, confirmText, withResp) => (
+prompt := (str, confirmText, inputValid?, withResp) => (
 	r := Renderer(document.body)
 	update := r.update
 
-	el := update(h('div', ['modal-wrapper'], [
+	` the prompt view is designed as its own, independent Torus render tree. It
+	keeps its own state and VDOM and calls its own render(). This is probably
+	not ideal in retrospect, but works well enough not to rewrite it. `
+
+	S := {
+		el: ()
+		fileName: ''
+		validInput?: inputValid?('')
+	}
+
+	render := () => S.el := update(h('div', ['modal-wrapper'], [
 		h('div', ['modal', 'modal-prompt'], [
 			h('div', ['modal-title'], [str])
-			h('input', ['modal-input'], [])
+			hae('input', ['modal-input'], {}, {
+				input: evt => (
+					S.fileName := evt.target.value
+					S.validInput? := inputValid?(S.fileName)
+					render()
+				)
+			}, [])
+			S.validInput? | S.fileName = '' :: {
+				false -> h('div', ['modal-warning'], [
+					f('A file called "{{0}}" already exists.', [S.fileName])
+				])
+			}
 			h('div', ['modal-buttons'], [
-				hae('button', ['button', 'okButton'], {}, {
+				hae('button', ['button', 'okButton'], {disabled: ~(S.validInput?)}, {
 					click: () => callback(input.value)
 				}, [confirmText])
 				hae('button', ['button', 'cancelButton'], {}, {
@@ -136,11 +157,14 @@ prompt := (str, confirmText, withResp) => (
 			])
 		])
 	]))
+	render()
 
 	handleKeys := evt => evt.key :: {
 		'Enter' -> (
 			bind(evt, 'preventDefault')()
-			callback(input.value)
+			S.validInput? :: {
+				true -> callback(input.value)
+			}
 		)
 		'Escape' -> (
 			bind(evt, 'preventDefault')()
@@ -154,7 +178,7 @@ prompt := (str, confirmText, withResp) => (
 	bind(document, 'addEventListener')('keydown', handleKeys)
 
 	callback := s => (
-		bind(document.body, 'removeChild')(el)
+		bind(document.body, 'removeChild')(S.el)
 		bind(document, 'removeEventListener')('keydown', handleKeys)
 		withResp(s)
 	)
@@ -163,6 +187,10 @@ prompt := (str, confirmText, withResp) => (
 confirm := (str, withResp) => (
 	r := Renderer(document.body)
 	update := r.update
+
+	` the confirm view is designed as its own, independent Torus render tree.
+	It keeps its own state and VDOM and calls its own render(). This is
+	probably not ideal in retrospect, but works well enough not to rewrite it. `
 
 	el := update(h('div', ['modal-wrapper'], [
 		h('div', ['modal', 'modal-prompt'], [
@@ -369,9 +397,13 @@ Editor := () => (
 			'textarea'
 			['editor-textarea', readOnly? :: {true -> 'readonly', _ -> ''}]
 			{
-				placeholder: 'Say something...'
+				placeholder: len(State.files) :: {
+					0 -> 'Create a new file to start writing.'
+					_ -> 'Say something...'
+				}
 				value: State.content
 				autofocus: true
+				disabled: len(State.files) = 0
 			}
 			{
 				input: handleInput
@@ -521,23 +553,29 @@ toggleColorScheme := () => (
 	render()
 )
 
-addFile := () => prompt('File name?', 'Create', fileName => fileName :: {
-	() -> ()
-	_ -> (
-		State.files.len(State.files) := fileName
-		sort!(State.files)
+addFile := () => prompt(
+	'File name?'
+	'Create'
+	` files with empty or duplicate names should not be created `
+	text => len(text) > 0 & every(map(State.files, name => ~(name = text)))
+	fileName => fileName :: {
+		() -> ()
+		_ -> (
+			State.files.len(State.files) := fileName
+			sort!(State.files)
 
-		State.editor.mode :: {
-			'preview' -> State.editor.mode := DefaultMode()
-		}
-		render()
+			State.editor.mode :: {
+				'preview' -> State.editor.mode := DefaultMode()
+			}
+			render()
 
-		withFetch('/doc/' + fileName, {method: 'PUT', body: ''}, () => (
-			setActive(fileName)
-			focusEditor()
-		))
-	)
-})
+			withFetch('/doc/' + fileName, {method: 'PUT', body: ''}, () => (
+				setActive(fileName)
+				focusEditor()
+			))
+		)
+	}
+)
 
 focusEditor := () => ta := bind(document, 'querySelector')('.editor-textarea') :: {
 	() -> ()

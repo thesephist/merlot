@@ -462,6 +462,12 @@ header nav .button {
     outline: 0;
 }
 
+.modal-warning {
+    margin: -6px 0 6px 0;
+    color: var(--secondary-text);
+    font-size: calc(1em - 4px);
+}
+
 .modal-buttons {
     display: flex;
     flex-direction: row-reverse;
@@ -471,6 +477,15 @@ header nav .button {
 
 .modal-buttons .button {
     margin-left: 4px;
+}
+
+.modal-buttons .button[disabled] {
+    cursor: no-drop;
+    color: var(--secondary-text);
+}
+
+.modal-buttons .button[disabled]:hover {
+    background: none;
 }
 
 .loading {
