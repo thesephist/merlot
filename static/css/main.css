@@ -241,7 +241,8 @@ header nav .button {
 }
 
 .file-list:empty::after {
-	content: '📭 No files';
+    content: '📭   No files';
+    white-space: pre-wrap; /* preserve space after emoji */
     display: flex;
     width: 100%;
     height: 100%;
@@ -353,12 +354,13 @@ header nav .button {
 }
 
 .preview-content:empty::after {
-	content: '👀 Nothing to preview';
+    content: '👀   Nothing to preview';
+    white-space: pre-wrap; /* preserve space after emoji */
     display: flex;
-	margin-top: 5em;
+    margin-top: 5em;
     align-items: center;
     justify-content: center;
-	text-align: center;
+    text-align: center;
     color: var(--secondary-text);
 }
 
